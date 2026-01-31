@@ -47,3 +47,9 @@ def update_customer(request,cust_id):
         tab_cust.address=address
         tab_cust.save()
         return redirect("/customers/")
+
+def delete_customer(request,cust_id):
+    data=TableCustomer.objects.get(id=cust_id)
+    data.delete()
+    return redirect("/customers/")
+

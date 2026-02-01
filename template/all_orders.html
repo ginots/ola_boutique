@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+{% include "navbar.html" %}
+
+            <!-- table Start -->
+            <div class="container-fluid pt-4 px-4">
+                <div class="col-12">
+                        <div class="bg-secondary rounded h-100 p-4">
+                            <h6 class="mb-4">All Orders</h6>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Customer ID</th>
+                                            <th scope="col">Order Date</th>
+                                            <th scope="col">Due Date</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Phone Number</th>
+                                            <th scope="col">Email</th>
+                                            <th scope="col">Address</th>
+                                            <th scope="col">Cloth Type</th>
+                                            <th scope="col">Item</th>
+                                            <th scope="col">Lining</th>
+                                            <th scope="col">Bottom</th>
+                                            <th scope="col">Locking</th>
+                                            <th scope="col">Pattern</th>
+                                            <th scope="col">Sareefall Type</th>
+                                            <th scope="col">Sample Image</th>
+                                            <th scope="col">Stitching Charges</th>
+                                            <th scope="col">Additional Charges</th>
+                                            <th scope="col">Total</th>
+                                            <th scope="col">Advance Paid</th>
+                                            <th scope="col">Balance to Pay</th>
+                                            <th scope="col">Notes</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    {% for i in orders %}
+                                    <tbody>
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ i.customer_id }}</td>
+                                            <td>{{i.date}}</td>
+                                            <td>{{i.due_date}}</td>
+                                            <td>{{ i.name }}</td>
+                                            <td>{{i.phone}}</td>
+                                            <td>{{i.email}}</td>
+                                            <td>{{i.address}}</td>
+                                            <td>{{i.cloth_type}}</td>
+                                            <td>{{i.item}}</td>
+                                            <td>{{i.lining}}</td>
+                                            <td>{{i.bottom}}</td>
+                                            <td>{{i.locking}}</td>
+                                            <td>{{i.pattern}}</td>
+                                            <td>{{i.sareefall_type}}</td>
+                                            <td>
+                                                  {% if i.image %}
+                                                  <img src="{{ i.image.url}}" width="50" height="50" >
+                                                    <a href="{{ i.image.url }}" download class="btn btn-sm btn-outline-success py-0 px-1">
+                                                        ⬇
+                                                    </a>
+                                                  {% else %}
+                                                <span>No Image</span>
+                                                  {% endif %}
+                                            </td>
+                                            <td>{{i.stitching_charges}}</td>
+                                            <td>{{i.additional_charges}}</td>
+                                            <td>{{i.total}}</td>
+                                            <td>{{i.advance_paid}}</td>
+                                            <td>{{i.balance}}</td>
+                                            <td>{{i.notes}}</td>
+
+                                            <td>
+                                              {{ i.status }}
+                                              <button class="btn btn-sm btn-outline-primary py-0 px-1"
+                                                      data-bs-toggle="modal"
+                                                      data-bs-target="#statusModal{{ i.id }}">
+                                                ✏️
+                                              </button>
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                    <div class="modal fade" id="statusModal{{ i.id }}" tabindex="-1">
+                                      <div class="modal-dialog modal-sm modal-dialog-centered">
+                                        <div class="modal-content">
+                                          <form method="post" action="{% url 'update_order_status' i.id %}">
+                                            {% csrf_token %}
+                                            <div class="modal-header py-2">
+                                              <h6 class="modal-title">Update Status</h6>
+                                              <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal"></button>
+                                            </div>
+
+                                            <div class="modal-body py-2">
+                                              <select name="status" class="form-select form-select-sm" required>
+                                                <option value="Ordered" {% if i.status == "Ordered" %}selected{% endif %}>Ordered</option>
+                                                <option value="Completed" {% if i.status == "Completed" %}selected{% endif %}>Completed</option>
+                                                <option value="Cancelled" {% if i.status == "Cancelled" %}selected{% endif %}>Cancelled</option>
+                                              </select>
+                                            </div>
+
+                                            <div class="modal-footer py-1">
+                                              <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                            </div>
+                                          </form>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                </div>
+            </div>
+
+            <!-- table End -->
+
+
+        </div>
+        <!-- Content End -->
+
+
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'lib/chart/chart.min.js' %}"></script>
+    <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+    <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+
+    <!-- Template Javascript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+
+</html>

@@ -34,6 +34,7 @@
                                             <td>
                                                 <a href="/edit_customer/{{i.id}}">Edit</a><br><br>
                                                 <a href="/delete_customer/{{i.id}}">Delete</a><br><br>
+
                                                 <a href="#">New order</a><br><br>
                                                 <button
                                                     class="btn btn-primary"
@@ -42,6 +43,9 @@
                                                     data-customer-id="{{ i.id }}">
                                                     Add Measurements
                                                 </button>
+
+                                                <a href="{% url 'new_order' i.id %}">New order</a>
+
                                             </td>
 
                                         </tr>

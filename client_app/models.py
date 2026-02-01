@@ -8,6 +8,7 @@ class TableCustomer(models.Model):
     email=models.EmailField(max_length=50,null=True)
     address=models.TextField(null=True)
 
+
 class TableChuridar(models.Model):
     customer_name=models.CharField(null=True, max_length=100)
     flength=models.CharField(max_length=100,null=True)
@@ -68,5 +69,30 @@ class TableSaree(models.Model):
     waist3 = models.CharField(max_length=100, null=True)
     length2 = models.CharField(max_length=100, null=True)
     pallu = models.CharField(max_length=100, null=True)
+
+class TableOrders(models.Model):
+    customer_id = models.IntegerField(null=True)
+    name = models.CharField(max_length=100, null=True)
+    phone = models.IntegerField(null=True)
+    email = models.EmailField(max_length=50,null=True)
+    address = models.TextField(null=True)
+    date = models.DateField(null=True, auto_now_add=True)
+    due_date = models.DateField(null=True)
+    cloth_type = models.CharField(max_length=100, null=True)
+    item = models.CharField(max_length=100, null=True)
+    lining = models.CharField(max_length=100, null=True)
+    bottom = models.CharField(max_length=100, null=True)
+    locking = models.CharField(max_length=100, null=True)
+    pattern = models.CharField(max_length=100, null=True)
+    sareefall_type = models.CharField(max_length=100, null=True)
+    image = models.ImageField(null=True, upload_to="media/")
+    stitching_charges = models.IntegerField(null=True)
+    additional_charges = models.IntegerField(null=True)
+    total = models.IntegerField(null=True)
+    advance_paid = models.IntegerField(null=True)
+    balance = models.IntegerField(null=True)
+    notes = models.TextField(null=True)
+    status = models.CharField(max_length=100, null=True)
+
 
 

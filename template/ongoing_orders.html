@@ -8,51 +8,7 @@
             <div class="container-fluid pt-4 px-4">
                 <div class="col-12">
                         <div class="bg-secondary rounded h-100 p-4">
-                            <h6 class="mb-4">All Orders</h6>
-                            <form method="get" class="d-flex gap-2 align-items-end ms-4">
-                                <div>
-                                    <label class="form-label text-xs fw-bold">Search</label>
-                                    <input type="search"
-                                           class="form-control form-control-sm bg-dark text-light"
-                                           placeholder="customer id/name/phone"
-                                           name="search_general"
-                                           value="{{ request.GET.search_general }}">
-                                </div>
-                                <div>
-                                    <label class="form-label text-xs fw-bold">Order Status</label>
-                                    <select name="status" class="form-select form-select-sm">
-                                        <option value="">All Statuses</option>
-                                        <option value="Ordered" {% if request.GET.status == "Ordered" %}selected{% endif %}>Ordered</option>
-                                        <option value="Completed" {% if request.GET.status == "Completed" %}selected{% endif %}>Completed</option>
-                                        <option value="Cancelled" {% if request.GET.status == "Cancelled" %}selected{% endif %}>Cancelled</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="form-label text-xs fw-bold">Purchase Date</label>
-                                    <input type="date"
-                                           name="purchase_date"
-                                           value="{{ request.GET.purchase_date }}"
-                                           class="form-control form-control-sm bg-light text-dark">
-                                </div>
-                                <div>
-                                    <label class="form-label text-xs fw-bold">Due Date</label>
-                                    <input type="date"
-                                           name="due_date"
-                                           value="{{ request.GET.due_date }}"
-                                           class="form-control form-control-sm bg-light text-dark">
-                                </div>
-
-                                <button type="submit" class="btn btn-sm btn-primary">
-                                    Filter
-                                </button>
-                                <a href="{% url 'all_orders' %}" class="btn btn-sm btn-outline-primary">
-                                    Clear
-                                </a>
-                                <button type="button" onclick="exportData()" class="btn btn-link text-success p-0 me-3">
-                                    <i class="fas fa-download"></i> Export Data
-                                </button>
-                            </form>
-
+                            <h6 class="mb-4">Ongoing Orders</h6>
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
@@ -187,13 +143,6 @@
     <!-- Template Javascript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
     <script src="{% static 'js/main.js' %}"></script>
-
-    <script>
-        function exportData() {
-            const urlParams = new URLSearchParams(window.location.search);
-            window.location.href = "{% url 'export_orders_csv' %}?" + urlParams.toString();
-        }
-    </script>
 </body>
 
 </html>

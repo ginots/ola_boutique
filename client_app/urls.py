@@ -17,10 +17,7 @@ urlpatterns=[
     path('add_saree_measurement/<cust_id>/', views.add_saree_measurement, name='add_saree_measurement'),
     path("save_sr_measure/",views.save_sr_measure,name="save_sr_measure"),
 
-    path("new-order/<cust_id>/", views.new_order, name="new_order"),
-    path("save-order/", views.save_order, name="save_order"),
-    path("all-orders", views.all_orders, name="all_orders"),
-    path("order-status/<order_id>/", views.update_order_status, name="update_order_status"),
+
 
 
 ]

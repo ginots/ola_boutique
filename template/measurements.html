@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+{% include "navbar.html" %}
+
+            <!-- table Start -->
+            <div class="container-fluid pt-4 px-4">
+                <a href="/add_customer" type="button" class="btn btn-lg btn-secondary m-2">Add customer</a>
+                <div class="col-12">
+                        <div class="bg-secondary rounded h-100 p-4">
+                            <h6 class="mb-4">For churidar set,gown and frock</h6>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <!-- ROW 1: MAIN GROUPS -->
+                                        <tr>
+                                            <th rowspan="3">ID</th>
+                                            <th rowspan="3">Customer Name</th>
+
+                                            <th colspan="21">TOP</th>
+                                            <th colspan="8">BOTTOM</th>
+
+                                            <th rowspan="3">Action</th>
+                                        </tr>
+
+                                        <!-- ROW 2: RANGE DESCRIPTION (KEY FOR CLARITY) -->
+                                        <tr>
+                                            <th colspan="21">Full Length → Neck Width</th>
+                                            <th colspan="8">Waist → Down Flare</th>
+                                        </tr>
+
+                                        <!-- ROW 3: ACTUAL COLUMN HEADERS -->
+                                        <tr>
+                                            <!-- TOP -->
+                                            <th>Full length</th>
+                                            <th>Point</th>
+                                            <th>Tuck</th>
+                                            <th>Yoke</th>
+                                            <th>P.W</th>
+                                            <th>Slit</th>
+                                            <th>Shoulder</th>
+                                            <th>Sleeve length</th>
+                                            <th>Sleeve round</th>
+                                            <th>Muscle</th>
+                                            <th>Arm hole</th>
+                                            <th>Arm pit F</th>
+                                            <th>Arm pit B</th>
+                                            <th>Chest</th>
+                                            <th>Bust</th>
+                                            <th>Waist</th>
+                                            <th>Hip</th>
+                                            <th>Seat</th>
+                                            <th>Neck F</th>
+                                            <th>Neck B</th>
+                                            <th>Neck W</th>
+
+                                            <!-- BOTTOM -->
+                                            <th>Waist</th>
+                                            <th>Length</th>
+                                            <th>Width</th>
+                                            <th>Knee L</th>
+                                            <th>Knee R</th>
+                                            <th>Thigh L</th>
+                                            <th>Thigh R</th>
+                                            <th>Down Flare</th>
+                                        </tr>
+                                    </thead>
+                                    {% for i in chd %}
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">{{ forloop.counter }}</th>
+                                            <td>{{ i.customer_name }}</td>
+                                            <td>{{i.flength}}</td>
+                                            <td>{{i.point}}</td>
+                                            <td>{{i.tuck}}</td>
+                                            <td>{{i.yoke}}</td>
+                                            <td>{{i.pw}}</td>
+                                            <td>{{i.slit}}</td>
+                                            <td>{{i.shoulder}}</td>
+                                            <td>{{i.sl}}</td>
+                                            <td>{{i.sr}}</td>
+                                            <td>{{i.muscle}}</td>
+                                            <td>{{i.ah}}</td>
+                                            <td>{{i.apf}}</td>
+                                            <td>{{i.apb}}</td>
+                                            <td>{{i.chest}}</td>
+                                            <td>{{i.bust}}</td>
+                                            <td>{{i.waist1}}</td>
+                                            <td>{{i.hip}}</td>
+                                            <td>{{i.seat}}</td>
+                                            <td>{{i.neckf}}</td>
+                                            <td>{{i.neckb}}</td>
+                                            <td>{{i.neckw}}</td>
+                                            <td>{{i.waist2}}</td>
+                                            <td>{{i.length}}</td>
+                                            <td>{{i.width}}</td>
+                                            <td>{{i.kneel}}</td>
+                                            <td>{{i.kneer}}</td>
+                                            <td>{{i.thighl}}</td>
+                                            <td>{{i.thighr}}</td>
+                                            <td>{{i.downf}}</td>
+
+                                            <td>
+                                                <a href="/edit_chmeasure/{{i.id}}">Edit</a><br><br>
+                                                <a href="/delete_chmeasure/{{i.id}}">Delete</a><br><br>
+
+                                            </td>
+
+                                        </tr>
+                                    </tbody>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                </div>
+
+                <div class="col-12">
+                        <div class="bg-secondary rounded h-100 p-4">
+                            <h6 class="mb-4">For blouse,saree</h6>
+                            <div class="table-responsive">
+                                <table class="table">
+                                   <thead>
+                                        <!-- ROW 1: MAIN GROUPS -->
+                                        <tr>
+                                            <th rowspan="3">ID</th>
+                                            <th rowspan="3">Customer Name</th>
+
+                                            <th colspan="17">BLOUSE</th>
+                                            <th colspan="6">UNDER SKIRT</th>
+                                            <th colspan="3">READY TO WEAR SAREE</th>
+                                        </tr>
+
+                                        <!-- ROW 2: RANGE / DESCRIPTION -->
+                                        <tr>
+                                            <th colspan="17">Top Measurements</th>
+                                            <th colspan="6">Waist to Down</th>
+                                            <th colspan="3">Pre-stitched Saree</th>
+                                        </tr>
+
+                                        <!-- ROW 3: ACTUAL COLUMN HEADERS -->
+
+                                        <!-- BLOUSE -->
+                                        <tr>
+                                            <th>Full length</th>
+                                            <th>Point</th>
+                                            <th>Tuck</th>
+                                            <th>P.W</th>
+                                            <th>Shoulder</th>
+                                            <th>Sleeve length</th>
+                                            <th>Sleeve round</th>
+                                            <th>Muscle</th>
+                                            <th>Arm hole</th>
+                                            <th>Armpit F</th>
+                                            <th>Armpit B</th>
+                                            <th>Chest</th>
+                                            <th>Bust</th>
+                                            <th>Waist</th>
+                                            <th>Neck F</th>
+                                            <th>Neck B</th>
+                                            <th>Neck W</th>
+
+                                            <!-- UNDER SKIRT -->
+                                            <th>Waist</th>
+                                            <th>Length</th>
+                                            <th>Down width</th>
+                                            <th>Knee L</th>
+                                            <th>Knee R</th>
+                                            <th>Seat</th>
+
+                                            <!-- READY TO WEAR SAREE -->
+                                            <th>Waist</th>
+                                            <th>Length</th>
+                                            <th>Pallu</th>
+                                        </tr>
+                                   </thead>
+
+                                    {% for i in sar %}
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">{{ forloop.counter }}</th>
+                                            <td>{{ i.customer_name }}</td>
+                                            <td>{{i.flength}}</td>
+                                            <td>{{i.point}}</td>
+                                            <td>{{i.tuck}}</td>
+                                            <td>{{i.pw}}</td>
+                                            <td>{{i.shoulder}}</td>
+                                            <td>{{i.sl}}</td>
+                                            <td>{{i.sr}}</td>
+                                            <td>{{i.muscle}}</td>
+                                            <td>{{i.ah}}</td>
+                                            <td>{{i.apf}}</td>
+                                            <td>{{i.apb}}</td>
+                                            <td>{{i.chest}}</td>
+                                            <td>{{i.bust}}</td>
+                                            <td>{{i.waist1}}</td>
+                                            <td>{{i.neckf}}</td>
+                                            <td>{{i.neckb}}</td>
+                                            <td>{{i.neckw}}</td>
+                                            <td>{{i.waist2}}</td>
+                                            <td>{{i.length1}}</td>
+                                            <td>{{i.dwidth}}</td>
+                                            <td>{{i.kneel}}</td>
+                                            <td>{{i.kneer}}</td>
+                                            <td>{{i.seat}}</td>
+                                            <td>{{i.waist3}}</td>
+                                            <td>{{i.length2}}</td>
+                                            <td>{{i.pallu}}</td>
+
+                                            <td>
+                                                <a href="/edit_srmeasure/{{i.id}}">Edit</a><br><br>
+                                                <a href="/delete_srmeasure/{{i.id}}">Delete</a><br><br>
+                                                <a href="#">New order</a>
+                                            </td>
+
+                                        </tr>
+                                    </tbody>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                </div>
+            </div>
+
+            <!-- table End -->
+
+
+            <!-- Footer Start -->
+            <div class="container-fluid pt-4 px-4">
+                <div class="bg-secondary rounded-top p-4">
+                    <div class="row">
+                        <div class="col-12 col-sm-6 text-center text-sm-start">
+                            &copy; <a href="#">Your Site Name</a>, All Right Reserved.
+                        </div>
+                        <div class="col-12 col-sm-6 text-center text-sm-end">
+                            <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
+                            Designed By <a href="https://htmlcodex.com">HTML Codex</a>
+                            <br>Distributed By: <a href="https://themewagon.com" target="_blank">ThemeWagon</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer End -->
+        </div>
+        <!-- Content End -->
+
+
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'lib/chart/chart.min.js' %}"></script>
+    <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+    <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+
+    <!-- Template Javascript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+
+</html>

@@ -53,3 +53,88 @@ def delete_customer(request,cust_id):
     data.delete()
     return redirect("/customers/")
 
+def measurements(request):
+    chd=TableChuridar.objects.all()
+    sar=TableSaree.objects.all()
+    return render(request,"measurements.html",{"chd":chd,"sar":sar})
+
+def add_churidar_measurement(request,cust_id):
+    cust=TableCustomer.objects.get(id=cust_id)
+    return render(request,"add_churidar_measurement.html",{"cust":cust})
+
+def save_ch_measure(request):
+    if request.method=="POST":
+
+        customer_name= request.POST.get("customer_name")
+        tab_chd=TableChuridar()
+        tab_chd.customer_name=customer_name
+        tab_chd.flength = request.POST.get("flength")
+        tab_chd.point =request.POST.get("point")
+        tab_chd.tuck = request.POST.get("tuck")
+        tab_chd.yoke = request.POST.get("yoke")
+        tab_chd.pw = request.POST.get("pw")
+        tab_chd.slit = request.POST.get("slit")
+        tab_chd.shoulder = request.POST.get("shoulder")
+        tab_chd.sl = request.POST.get("sl")
+        tab_chd.sr = request.POST.get("sr")
+        tab_chd.muscle =request.POST.get("muscle")
+        tab_chd.ah = request.POST.get("ah")
+        tab_chd.apf = request.POST.get("armf")
+        tab_chd.apb = request.POST.get("armb")
+        tab_chd.chest = request.POST.get("chest")
+        tab_chd.bust = request.POST.get("bust")
+        tab_chd.waist1 = request.POST.get("waist1")
+        tab_chd.hip = request.POST.get("hip")
+        tab_chd.seat = request.POST.get("seat")
+        tab_chd.neckf = request.POST.get("neckf")
+        tab_chd.neckb = request.POST.get("neckb")
+        tab_chd.neckw =request.POST.get("neckw")
+        tab_chd.waist2 = request.POST.get("waist2")
+        tab_chd.length = request.POST.get("length")
+        tab_chd.width = request.POST.get("width")
+        tab_chd.kneel = request.POST.get("kneel")
+        tab_chd.kneer = request.POST.get("kneer")
+        tab_chd.thighl = request.POST.get("thl")
+        tab_chd.thighr = request.POST.get("thr")
+        tab_chd.downf = request.POST.get("dfl")
+        tab_chd.save()
+        return redirect("/measurements/")
+
+
+def add_saree_measurement(request,cust_id):
+    cust=TableCustomer.objects.get(id=cust_id)
+    return render(request,"add_saree_measurement.html",{"cust":cust})
+
+def save_sr_measure(request):
+    if request.method == "POST":
+        customer_name = request.POST.get("customer_name")
+        tab_sr = TableSaree()
+        tab_sr.customer_name = customer_name
+        tab_sr.flength = request.POST.get("flength")
+        tab_sr.point = request.POST.get("point")
+        tab_sr.tuck = request.POST.get("tuck")
+        tab_sr.pw = request.POST.get("pw")
+        tab_sr.shoulder = request.POST.get("shoulder")
+        tab_sr.sl = request.POST.get("sl")
+        tab_sr.sr = request.POST.get("sr")
+        tab_sr.muscle = request.POST.get("muscle")
+        tab_sr.ah = request.POST.get("ah")
+        tab_sr.apf = request.POST.get("armf")
+        tab_sr.apb = request.POST.get("armb")
+        tab_sr.chest = request.POST.get("chest")
+        tab_sr.bust = request.POST.get("bust")
+        tab_sr.waist1 = request.POST.get("waist1")
+        tab_sr.neckf = request.POST.get("neckf")
+        tab_sr.neckb = request.POST.get("neckb")
+        tab_sr.neckw = request.POST.get("neckw")
+        tab_sr.waist2 = request.POST.get("waist2")
+        tab_sr.length1 = request.POST.get("length1")
+        tab_sr.dwidth = request.POST.get("dwidth")
+        tab_sr.kneel = request.POST.get("kneel")
+        tab_sr.kneer = request.POST.get("kneer")
+        tab_sr.seat = request.POST.get("seat")
+        tab_sr.waist3 = request.POST.get("waist3")
+        tab_sr.length2 = request.POST.get("length2")
+        tab_sr.pallu = request.POST.get("pallu")
+        tab_sr.save()
+        return redirect("/measurements/")

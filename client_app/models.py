@@ -2,15 +2,27 @@ from django.db import models
 
 # Create your models here.
 
+
+
 class TableCustomer(models.Model):
-    name=models.CharField(max_length=100, null=True)
-    phone=models.IntegerField(null=True)
-    email=models.EmailField(max_length=50,null=True)
-    address=models.TextField(null=True)
+    custid = models.CharField(max_length=20, unique=True, blank=True)
+    name = models.CharField(max_length=100, null=True)
+    phone = models.IntegerField(null=True)
+    email = models.EmailField(max_length=50, null=True)
+    address = models.TextField(null=True)
+
+    def save(self, *args, **kwargs):
+        creating = self.pk is None
+
+        super().save(*args, **kwargs)
+
+        if creating and not self.custid:
+            self.custid = f"OLA{self.id}"
+            super().save(update_fields=["custid"])
 
 
 class TableChuridar(models.Model):
-    customer_name=models.CharField(null=True, max_length=100)
+    customer=models.ForeignKey(TableCustomer,on_delete=models.CASCADE,null=True)
     flength=models.CharField(max_length=100,null=True)
     point=models.CharField(max_length=100,null=True)
     tuck=models.CharField(max_length=100,null=True)
@@ -42,7 +54,7 @@ class TableChuridar(models.Model):
     downf=models.CharField(max_length=100,null=True)
 
 class TableSaree(models.Model):
-    customer_name = models.CharField(null=True, max_length=100)
+    customer = models.ForeignKey(TableCustomer, on_delete=models.CASCADE, null=True)
     flength = models.CharField(max_length=100, null=True)
     point = models.CharField(max_length=100, null=True)
     tuck = models.CharField(max_length=100, null=True)

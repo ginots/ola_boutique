@@ -65,10 +65,12 @@ def add_churidar_measurement(request,cust_id):
 
 def save_ch_measure(request):
     if request.method=="POST":
+        cid= request.POST.get("customer_id")
 
-        customer_name= request.POST.get("customer_name")
+        customer= TableCustomer.objects.get(id=cid)
+
         tab_chd=TableChuridar()
-        tab_chd.customer_name=customer_name
+        tab_chd.customer=customer
         tab_chd.flength = request.POST.get("flength")
         tab_chd.point =request.POST.get("point")
         tab_chd.tuck = request.POST.get("tuck")
@@ -102,15 +104,18 @@ def save_ch_measure(request):
         return redirect("/measurements/")
 
 
+
+
 def add_saree_measurement(request,cust_id):
     cust=TableCustomer.objects.get(id=cust_id)
     return render(request,"add_saree_measurement.html",{"cust":cust})
 
 def save_sr_measure(request):
     if request.method == "POST":
-        customer_name = request.POST.get("customer_name")
+        cid=request.POST.get("customer_id")
+        customer = TableCustomer.objects.get(id=cid)
         tab_sr = TableSaree()
-        tab_sr.customer_name = customer_name
+        tab_sr.customer= customer
         tab_sr.flength = request.POST.get("flength")
         tab_sr.point = request.POST.get("point")
         tab_sr.tuck = request.POST.get("tuck")

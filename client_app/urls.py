@@ -27,6 +27,24 @@ urlpatterns=[
     path("staff_details/",views.staff_details),
     path("add_staff/",views.add_staff),
     path("save_staff/",views.save_staff),
+    path("edit_staff/<stf_id>",views.edit_staff),
+    path("update_staff/<stf_id>",views.update_staff),
+    path("staff_emp/",views.staff_emp),
+    path("update_emp/",views.update_emp),
+    path("salary_status/",views.salary_status),
+    path("salary_generate/",views.salary_generate),
+    path("generate_salary/",views.generate_salary),
+    path("delete_salary/", views.delete_salary, name="delete_salary"),
+    path("save_salary/",views.save_salary),
+    path("toggle_salary_status/<sal_id>/", views.toggle_salary_status),
+    path("add_overtime/<sal_id>",views.add_overtime),
+    path("save_overtime/",views.save_overtime),
+    path("delete_overtime/<sal_id>/", views.delete_overtime, name="delete_overtime"),
+    path("edit_salary_status/<stf_id>/",views.edit_salary_status,name="edit_salary_status"),
+    path("get_overtime_details/<salary_id>/",views.get_overtime_details,name="overtime_details"),
+    path("salary_history/",views.salary_history),
+    path("export-salary-csv/", views.export_salary_csv, name="export_salary_csv"),
+
 
 
 ]

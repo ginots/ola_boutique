@@ -6,26 +6,27 @@
 
             <!-- table Start -->
             <div class="container-fluid pt-4 px-4">
-                <form method="get" class="d-flex align-items-end gap-3 ms-4">
 
-                    <div style="min-width: 420px;">
-                        <label class="form-label small fw-bold">Search</label>
-                        <input type="search"
-                               class="form-control bg-dark text-light border border-secondary"
-                               placeholder="Customer name / ID / phone number / email ID"
-                               name="search_general"
-                               value="{{ request.GET.search_general }}">
-                    </div>
-
-                    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
-                    <a href="/customers/" class="btn btn-sm btn-outline-primary">Clear</a>
-
-                </form>
 
                 <a href="/add_customer" type="button" class="btn btn-lg btn-secondary m-2">Add customer</a>
+
                 <div class="col-12">
                         <div class="bg-secondary rounded h-100 p-4">
                             <h6 class="mb-4">Customers</h6>
+                            <form method="get" class="d-flex align-items-end gap-3 ms-4">
+                                <div style="min-width: 420px;">
+                                    <label class="form-label small fw-bold">Search</label>
+                                    <input type="search"
+                                           class="form-control bg-dark text-light border border-secondary"
+                                           placeholder="Customer name / ID / phone number / email ID"
+                                           name="search_general"
+                                           value="{{ request.GET.search_general }}">
+                                </div>
+
+                                <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+                                <a href="/customers/" class="btn btn-sm btn-outline-primary">Clear</a>
+                            </form>
+                            <br><br>
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
@@ -77,22 +78,6 @@
             <!-- table End -->
 
 
-            <!-- Footer Start -->
-            <div class="container-fluid pt-4 px-4">
-                <div class="bg-secondary rounded-top p-4">
-                    <div class="row">
-                        <div class="col-12 col-sm-6 text-center text-sm-start">
-                            &copy; <a href="#">Your Site Name</a>, All Right Reserved.
-                        </div>
-                        <div class="col-12 col-sm-6 text-center text-sm-end">
-                            <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-                            Designed By <a href="https://htmlcodex.com">HTML Codex</a>
-                            <br>Distributed By: <a href="https://themewagon.com" target="_blank">ThemeWagon</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Footer End -->
         </div>
         <!-- Content End -->
 

@@ -114,6 +114,7 @@ class TableStaffs(models.Model):
     email=models.EmailField(null=True)
     address=models.CharField(max_length=100,null=True)
     status=models.CharField(max_length=20,null=True)
+    monthly_salary = models.FloatField(default=0)
 
     def save(self, *args, **kwargs):
         creating = self.pk is None
@@ -124,5 +125,22 @@ class TableStaffs(models.Model):
             self.staffid = f"STAFF{self.id}"
             super().save(update_fields=["staffid"])
 
+class TableSalary(models.Model):
+    staff = models.ForeignKey(TableStaffs, on_delete=models.CASCADE,null=True)
+    date = models.DateField(null=True)
+    salary_month = models.DateField(null=True, blank=True)
+    fixed_salary = models.FloatField(null=True)
+    total_overtime = models.FloatField(default=0)
+    total_salary = models.FloatField(null=True)
+    status = models.CharField(max_length=20,choices=[('pending', 'Pending'), ('paid', 'Paid')],default='pending')
+
+class TableOvertime(models.Model):
+    staff = models.ForeignKey(TableStaffs, on_delete=models.CASCADE,null=True)
+    ot_date = models.DateField(null=True)
+    extra_hours = models.FloatField(null=True)
+    ot_amount = models.FloatField(null=True)
+    status = models.CharField(max_length=20,choices=[('pending', 'Pending'), ('paid', 'Paid')],default='pending')
+    salary = models.ForeignKey(TableSalary,on_delete=models.CASCADE,null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
 
 

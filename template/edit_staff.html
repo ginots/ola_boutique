@@ -2,51 +2,62 @@
 {% load static %}
 <html lang="en">
 
+
 {% include "navbar.html" %}
+
 
             <div class="container-fluid pt-4 px-4">
                 <div class="col-12">
                         <div class="bg-secondary rounded h-100 p-4">
-                            <h6 class="mb-4">Edit customer details</h6>
-                            <form action="/update_customer/{{data.id}}" method="post" enctype="multipart/form-data">{% csrf_token %}
+                            <h6 class="mb-4">Staff details update</h6>
+                            <form action="/update_staff/{{data.id}}" method="post" enctype="multipart/form-data">{% csrf_token %}
                                 <div class="row mb-3">
                                     <label for="name" class="col-sm-2 col-form-label">Name</label>
                                     <div class="col-sm-10">
-                                        <input type="text" name="name" class="form-control" value="{{data.name}}" id="name">
+                                        <input type="text" name="name" value="{{data.name}}" class="form-control" id="name" >
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
-                                    <label for="phone" class="col-sm-2 col-form-label">Phone</label>
+                                    <label for="phone" class="col-sm-2 col-form-label">Phone number</label>
                                     <div class="col-sm-10">
-                                        <input type="number" name="phone" class="form-control" value="{{data.phone}}" id="phone">
+                                        <input type="number" name="phone" value="{{data.phone}}" class="form-control" id="phone" >
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <label for="role" class="col-sm-2 col-form-label">Role</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" name="role" value="{{data.role}}" class="form-control" id="role" >
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
                                     <label for="email" class="col-sm-2 col-form-label">Email</label>
                                     <div class="col-sm-10">
-                                        <input type="email" name="email" class="form-control" value="{{data.email}}" id="email">
+                                        <input type="email" name="email" value="{{data.email}}" class="form-control" id="email">
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
-                                    <label for="name" class="col-sm-2 col-form-label">Address</label>
+                                    <label for="address" class="col-sm-2 col-form-label">Address</label>
                                     <div class="col-sm-10">
-                                        <textarea  name="address" class="form-control" id="address" style="width:50">{{data.address}}</textarea>
+                                      <textarea  name="address" class="form-control" id="address" style="width:50">{{data.address}}</textarea>
                                     </div>
                                 </div>
 
+                                <div class="row mb-3">
+                                    <label for="salary" class="col-sm-2 col-form-label">Monthly Salary</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" name="salary" value="{{data.monthly_salary}}" class="form-control" id="salary" >
+                                    </div>
+                                </div>
 
                                 <button type="submit" name="submit" class="btn btn-primary">Update</button>
                             </form>
                         </div>
                     </div>
             </div>
-
-
-
-
 
         </div>
         <!-- Content End -->

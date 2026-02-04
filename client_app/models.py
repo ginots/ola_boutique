@@ -84,6 +84,7 @@ class TableSaree(models.Model):
 
 class TableOrders(models.Model):
     customer_id = models.CharField(null=True)
+    order_id = models.CharField(max_length=100, null=True, unique=True)
     name = models.CharField(max_length=100, null=True)
     phone = models.IntegerField(null=True)
     email = models.EmailField(max_length=50,null=True)

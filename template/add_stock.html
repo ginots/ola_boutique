@@ -9,7 +9,7 @@
             <div class="container-fluid pt-4 px-4">
                 <div class="col-12">
                         <div class="bg-secondary rounded h-100 p-4">
-                            <h6 class="mb-4">Customer Form</h6>
+                            <h6 class="mb-4">Add Stock</h6>
                             <form action="{% url 'save_stock' %}" method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="row mb-3">
@@ -59,9 +59,6 @@
         <!-- Content End -->
 
 
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
-    </div>
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>

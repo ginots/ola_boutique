@@ -15,6 +15,7 @@
                                         <tr>
                                             <th scope="col">ID</th>
                                             <th scope="col">Customer ID</th>
+                                            <th scope="col">Order ID</th>
                                             <th scope="col">Order Date</th>
                                             <th scope="col">Due Date</th>
                                             <th scope="col">Name</th>
@@ -41,8 +42,9 @@
                                     {% for i in orders %}
                                     <tbody>
                                         <tr>
-                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
                                             <td>{{ i.customer_id }}</td>
+                                            <td>{{ i.order_id }}</td>
                                             <td>{{i.date}}</td>
                                             <td>{{i.due_date}}</td>
                                             <td>{{ i.name }}</td>
@@ -81,6 +83,7 @@
                                                 ✏️
                                               </button>
                                             </td>
+                                            <td><a class="btn btn-sm btn-primary" href="{% url 'invoice' i.id %}">Invoice</a></td>
 
 
                                         </tr>
@@ -113,6 +116,55 @@
 
                                     {% endfor %}
                                 </table>
+                                <nav>
+                                    <ul class="pagination pagination-sm justify-content-center mt-3">
+
+                                        {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                «
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">«</span>
+                                        </li>
+                                        {% endif %}
+
+                                        {% for num in page_obj.paginator.page_range %}
+                                            {% if page_obj.number == num %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ num }}</span>
+                                                </li>
+                                            {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+                                                <li class="page-item">
+                                                    <a class="page-link"
+                                                       href="?page={{ num }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                        {{ num }}
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                »
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">»</span>
+                                        </li>
+                                        {% endif %}
+
+                                    </ul>
+                                </nav>
+                                <p class="text-center text-muted small">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </p>
                             </div>
                         </div>
                 </div>
@@ -125,9 +177,6 @@
         <!-- Content End -->
 
 
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
-    </div>
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>

@@ -1,9 +1,15 @@
 import csv
 import datetime
+from datetime import date
 
-from django.db.models import Q
+from django.core.paginator import Paginator
+from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import render,redirect
+from django.db.models.functions import TruncMonth
+from django.utils import timezone
+from datetime import timedelta
+from django.db import transaction
 
 from client_app.models import TableOrders,TableCustomer
 
@@ -12,12 +18,73 @@ from .models import *
 
 # Create your views here.
 
+def index(request):
+    today = timezone.localdate()
+    year = today.year
+
+    daily_orders = TableOrders.objects.filter(date=today).count()
+    deliveries = TableOrders.objects.filter(due_date=today).count()
+    today_total = TableOrders.objects.filter(date=today, status__in=["Ordered", "Completed"]).aggregate(total=Sum("total"))["total"] or 0
+    month_total = TableOrders.objects.filter(date__year=year, date__month=today.month, status__in=["Ordered", "Completed"]).aggregate(total=Sum("total"))["total"] or 0
+
+    all_months = [date(year, m, 1) for m in range(1, 13)]
+    month_labels = [m.strftime("%b") for m in all_months]
+
+    monthly_totals = (
+        TableOrders.objects.filter(date__year=year, status__in=["Ordered", "Completed"])
+        .annotate(month=TruncMonth("date"))
+        .values("month")
+        .annotate(total=Sum("total"), advance=Sum("advance_paid"))
+    )
+
+    # Map month -> total / advance
+    total_map = {m["month"].month: m["total"] or 0 for m in monthly_totals}
+    advance_map = {m["month"].month: m["advance"] or 0 for m in monthly_totals}
+
+    totals = [total_map.get(m, 0) for m in range(1, 13)]
+    advance_data = [advance_map.get(m, 0) for m in range(1, 13)]
+
+    invoice = TableOrders.objects.all().order_by("-id")[:5]
+
+    context = {
+        "daily_orders": daily_orders,
+        "deliveries": deliveries,
+        "today_total": today_total,
+        "month_total": month_total,
+        "months": month_labels,
+        "totals": totals,
+        "advance_data": advance_data,
+        "invoice": invoice,
+    }
+
+    return render(request, "index.html", context)
+
+
+
 def new_order(request, cust_id):
     data = TableCustomer.objects.get(id=cust_id)
     return render(request,"new_order.html",{"data":data})
 
+@transaction.atomic
 def save_order(request):
     if request.method == "POST":
+        year = timezone.now().year
+
+        last_order = (
+            TableOrders.objects
+            .filter(order_id__startswith=f"ORD-{year}")
+            .order_by("-id")
+            .first()
+        )
+
+        if last_order:
+            last_number = int(last_order.order_id.split("-")[-1])
+            new_number = last_number + 1
+        else:
+            new_number = 1
+
+        order_id = f"ORD-{year}-{new_number:04d}"
+
         sareefall_type = None
         item = ""
         lining = ""
@@ -54,7 +121,7 @@ def save_order(request):
         notes = request.POST.get("notes")
         status = "Ordered"
 
-        TableOrders.objects.create( customer_id=customer_id,name=name,phone=phone,
+        TableOrders.objects.create( customer_id=customer_id, order_id=order_id, name=name,phone=phone,
                                     email=email, address=address,cloth_type=cloth_type,
                                    item=item, lining=lining, bottom=bottom,
                                    locking=locking, pattern=pattern, sareefall_type=sareefall_type,
@@ -65,7 +132,6 @@ def save_order(request):
 
         return redirect("all_orders")
 
-from django.db.models import Q
 
 def all_orders(request):
     orders = TableOrders.objects.all().order_by("-id")
@@ -79,7 +145,8 @@ def all_orders(request):
         orders = orders.filter(
             Q(name__icontains=q_search) |
             Q(customer_id__iexact=q_search) |
-            Q(phone__icontains=q_search)
+            Q(phone__icontains=q_search) |
+            Q(order_id__icontains=q_search)
         )
 
     if q_status:
@@ -91,7 +158,11 @@ def all_orders(request):
     if q_due:
         orders = orders.filter(due_date=q_due)
 
-    return render(request, "all_orders.html", {"orders": orders})
+    paginator = Paginator(orders, 10)  # 10 orders per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "all_orders.html", {"orders": page_obj,"page_obj":page_obj})
 
 
 def update_order_status(request, order_id):
@@ -131,7 +202,7 @@ def export_orders_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename={order_file}'
     writer = csv.writer(response)
-    writer.writerow(["Customer ID","Order Date","Due Date","Customer", "Email", "Phone Number", "Address", "Item", "Lining",
+    writer.writerow(["Customer ID","Order ID","Order Date","Due Date","Customer", "Email", "Phone Number", "Address", "Item", "Lining",
                     "Bottom", "Locking", "Pattern", "Sareefall Type", "Stitching Charge", "Additional Charge",
                     "Total","Advance Paid", "Balance to Pay", "Notes", "Order Status"])
 
@@ -139,6 +210,7 @@ def export_orders_csv(request):
         writer.writerow(
             [
                 i.customer_id,
+                i.order_id,
                 i.date,
                 i.due_date,
                 i.name,
@@ -164,11 +236,50 @@ def export_orders_csv(request):
 
 def ongoing_orders(request):
     orders = TableOrders.objects.filter(status="Ordered").order_by("-id")
-    return render(request, "ongoing_orders.html", {"orders": orders})
+    paginator = Paginator(orders, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, "ongoing_orders.html", {"orders": page_obj, "page_obj":page_obj})
 
 def stock(request):
     sto = TableStock.objects.all().order_by("-id")
-    return render(request, "stock.html",{"sto": sto})
+    q_search = request.GET.get('search_item')
+    if q_search:
+        sto = sto.filter(item__icontains=q_search)
+
+    paginator = Paginator(sto, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, "stock.html",{"sto": page_obj, "page_obj":page_obj})
+
+def export_stock_csv(request):
+    sto = TableStock.objects.all().order_by("-id")
+    q_search = request.GET.get('search_item')
+    if q_search:
+        sto = sto.filter(item__icontains=q_search)
+
+    today = datetime.date.today().strftime('%Y-%m-%d')
+    order_file = f"stock_{today}.csv"
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename={order_file}'
+    writer = csv.writer(response)
+    writer.writerow(
+        [
+            "ITEM","STOCK","UNIT","LOW STOCK THRESHOLD","NOTES"
+        ])
+
+    for i in sto:
+        writer.writerow(
+            [
+                i.item,
+                i.stock,
+                i.unit,
+                i.low_stock,
+                i.notes
+            ]
+        )
+    return response
 
 def add_stock(request):
         return render(request, "add_stock.html")
@@ -221,3 +332,73 @@ def save_used_stock(request, stock_id):
         tab_obj.stock = tab_obj.stock - used_stock
         tab_obj.save()
         return redirect("stock")
+
+def invoice(request, inv_id):
+    data = TableOrders.objects.get(id=inv_id)
+    return render(request, "invoice.html", {"data": data})
+
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.shortcuts import redirect
+
+def login_page(request):
+    if request.user.is_authenticated:
+        return redirect("index")
+    return render(request, "login.html")
+
+def check_signin(request):
+    if request.method == "POST":
+        username = request.POST.get("user_name", "").strip()
+        password = request.POST.get("password", "")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user:
+            login(request, user)
+            messages.success(request, f"Welcome back, {user.first_name}")
+            return redirect("index")
+        else:
+            messages.error(request, "Invalid email or password.")
+            return redirect("/")
+    return redirect("/")
+
+def sign_out(request):
+    logout(request)
+    return redirect("/")
+
+def profile(request):
+    return render(request, "profile.html")
+
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
+
+@login_required(login_url="/")
+def profile_settings(request):
+    user = request.user
+
+    if request.method == "POST":
+        user.first_name = request.POST.get("first_name", "").strip()
+        user.username = request.POST.get("username", "").strip()
+        user.email = request.POST.get("email", "").strip()
+
+        new_password = request.POST.get("password", "")
+        confirm_password = request.POST.get("confirm_password", "")
+
+        if new_password:
+            if len(new_password) < 8:
+                messages.error(request, "Password must be at least 8 characters.")
+                return redirect("profile")
+
+            if new_password != confirm_password:
+                messages.error(request, "Passwords do not match.")
+                return redirect("profile")
+
+            user.set_password(new_password)
+            update_session_auth_hash(request, user)
+
+        user.save()
+        messages.success(request, "Profile updated successfully.")
+        return redirect("profile")
+
+    return render(request, "profile.html", {"user": user})

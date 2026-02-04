@@ -6,7 +6,7 @@
     --dark: #000000;
 }
 
-.back-to-top {
+.back-to-top {a
     position: fixed;
     display: none;
     right: 45px;

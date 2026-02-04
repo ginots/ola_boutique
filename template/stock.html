@@ -9,8 +9,29 @@
                 <a href="{% url 'add_stock' %}" type="button" class="btn btn-lg btn-secondary m-2">Add Stock</a>
                 <div class="col-12">
                         <div class="bg-secondary rounded h-100 p-4">
-                            <h6 class="mb-4">Stock</h6>
+                            <h6 class="mb-4">INVENTORY</h6>
                             <div class="table-responsive">
+                                <form method="get" class="d-flex align-items-center gap-2 ms-4">
+                                    <label class="form-label mb-0 text-xs fw-bold">
+                                        Search
+                                    </label>
+
+                                    <input type="search"
+                                           class="form-control form-control-sm bg-dark text-light w-25"
+                                           placeholder="search by item"
+                                           name="search_item"
+                                           value="{{ request.GET.search_item }}">
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        Filter
+                                    </button>
+                                    <a href="{% url 'stock' %}" class="btn btn-sm btn-outline-primary">
+                                        Clear
+                                    </a>
+                                    <button type="button" onclick="exportData()" class="btn btn-link text-success p-0 me-3">
+                                        <i class="fas fa-download"></i> Export Data
+                                    </button>
+                                </form>
+
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -26,7 +47,7 @@
                                     {% for i in sto %}
                                     <tbody>
                                         <tr>
-                                            <td style="text-align: center;">{{ forloop.counter }}</td>
+                                            <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
                                             <td style="text-align: center;">{{ i.item }}</td>
                                             <td style="text-align: center;">{{i.stock}}</td>
                                             <td style="text-align: center;">{{i.unit}}</td>
@@ -34,7 +55,7 @@
                                             <td style="text-align: center;">{{i.notes}}</td>
 
                                             <td style="text-align: center;">
-                                                <a href="{% url 'edit_stock' i.id %}">Edit</a><br><br>
+                                                <a href="{% url 'edit_stock' i.id %}">Update</a><br><br>
                                                 <a href="{% url 'delete_stock' i.id %}">Delete</a><br><br>
                                                 <a href="{% url 'used_stock' i.id %}">Recently Used</a>
                                             </td>
@@ -43,6 +64,55 @@
                                     </tbody>
                                     {% endfor %}
                                 </table>
+                                <nav>
+                                    <ul class="pagination pagination-sm justify-content-center mt-3">
+
+                                        {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                «
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">«</span>
+                                        </li>
+                                        {% endif %}
+
+                                        {% for num in page_obj.paginator.page_range %}
+                                            {% if page_obj.number == num %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ num }}</span>
+                                                </li>
+                                            {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+                                                <li class="page-item">
+                                                    <a class="page-link"
+                                                       href="?page={{ num }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                        {{ num }}
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                »
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">»</span>
+                                        </li>
+                                        {% endif %}
+
+                                    </ul>
+                                </nav>
+                                <p class="text-center text-muted small">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </p>
                             </div>
                         </div>
                 </div>
@@ -56,9 +126,6 @@
         <!-- Content End -->
 
 
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
-    </div>
 
 
 
@@ -78,6 +145,13 @@
     <!-- Template Javascript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
     <script src="{% static 'js/main.js' %}"></script>
+
+    <script>
+        function exportData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            window.location.href = "{% url 'export_stock_csv' %}?" + urlParams.toString();
+        }
+    </script>
 
 </body>
 

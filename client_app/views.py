@@ -1,7 +1,8 @@
 import csv
-
+from datetime import date, datetime
+from django.contrib import messages
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.template.context_processors import request
 
@@ -360,6 +361,7 @@ def staff_details(request):
 def add_staff(request):
     return render(request,"add_staff.html")
 
+
 def save_staff(request):
     if request.method=="POST":
         tab_stf=TableStaffs()
@@ -368,6 +370,349 @@ def save_staff(request):
         tab_stf.role=request.POST.get("role")
         tab_stf.email=request.POST.get("email")
         tab_stf.address=request.POST.get("address")
-        tab_stf.status=request.POST.get("status")
+        tab_stf.monthly_salary=request.POST.get("salary")
+        tab_stf.status="active"
         tab_stf.save()
         return redirect("/staff_details/")
+
+def edit_staff(request,stf_id):
+    data=TableStaffs.objects.get(id=stf_id)
+    return render(request,"edit_staff.html",{"data":data})
+
+def update_staff(request,stf_id):
+    if request.method == "POST":
+        tab_stf = TableStaffs.objects.get(id=stf_id)
+        tab_stf.name = request.POST.get("name")
+        tab_stf.phone = request.POST.get("phone")
+        tab_stf.role = request.POST.get("role")
+        tab_stf.email = request.POST.get("email")
+        tab_stf.address = request.POST.get("address")
+        tab_stf.monthly_salary=request.POST.get("salary")
+        tab_stf.save()
+        return redirect("/staff_details/")
+
+def staff_emp(request):
+    data=TableStaffs.objects.all().order_by("-id")
+    return render(request,"staff_emp.html",{"data":data})
+
+def update_emp(request):
+    if request.method=="POST":
+        name= request.POST.get("name")
+        status=request.POST.get("status")
+
+        tab_stf=TableStaffs.objects.get(id=name)
+        tab_stf.status=status
+        tab_stf.save()
+        return redirect("/staff_details/")
+
+
+def salary_status(request):
+
+    latest_salary = TableSalary.objects.order_by("-date").first()
+
+    if latest_salary:
+        month = latest_salary.date.month
+        year = latest_salary.date.year
+
+        sal = TableSalary.objects.filter(
+            date__month=month,
+            date__year=year
+        ).order_by("-id")
+
+    else:
+        sal = TableSalary.objects.none()
+
+    return render(request, "salary_status.html", {"sal": sal})
+
+
+def salary_generate(request):
+    return render(request,"salary_generate.html")
+
+
+
+def generate_salary(request):
+
+    if request.method == "POST":
+
+        salary_date = request.POST.get("date")
+
+        if not salary_date:
+            messages.warning(request, "Please select a date.")
+            return redirect("/salary_status/")
+
+        from datetime import datetime
+
+        salary_date = datetime.strptime(salary_date, "%Y-%m-%d")
+
+        month = salary_date.month
+        year = salary_date.year
+        day= salary_date.day
+
+        if not month or not year:
+            messages.warning(request, "Please select month and year.")
+            return redirect("/salary_status/")
+
+        month = int(month)
+        year = int(year)
+        day=int(day)
+
+
+
+        already_exists = TableSalary.objects.filter(
+            date__month=month,
+            date__year=year,
+            date__day=day
+        ).exists()
+
+        if already_exists:
+            messages.warning(request, "Salary already generated for this month.")
+            return redirect("/salary_status/")
+
+        staffs = TableStaffs.objects.filter(status__iexact="active")
+
+        for staff in staffs:
+
+            TableSalary.objects.create(
+                staff=staff,
+                date=date(year, month, day),
+                fixed_salary=staff.monthly_salary,
+                total_overtime=0,
+                total_salary=staff.monthly_salary,
+                status="paid"
+            )
+
+        messages.success(request, "Salary generated successfully.")
+        return redirect("/salary_status/")
+
+def delete_salary(request):
+
+    if request.method == "POST":
+
+        salary_month = request.POST.get("month")
+
+        if not salary_month:
+            messages.warning(request, "Please select a date.")
+            return redirect("/salary_status/")
+
+        salary_date = datetime.strptime(salary_month, "%Y-%m")
+
+        month = salary_date.month
+        year = salary_date.year
+
+        salaries = TableSalary.objects.filter(
+            date__month=month,
+            date__year=year
+        )
+
+        if not salaries.exists():
+            messages.warning(request, "No salary found for this month.")
+            return redirect("/salary_status/")
+
+        salaries.delete()
+
+        messages.success(request, "Salary deleted successfully.")
+        return redirect("/salary_status/")
+
+
+def save_salary(request):
+    if request.method=="POST":
+        staff = request.POST.get("staff_id")
+        staff_obj = TableStaffs.objects.get(id=staff)
+        paymentdate = request.POST.get("date") or None
+        fixed_salary = float(request.POST.get("salary") or 0)
+        status=request.POST.get("status")
+        tab_sal=TableSalary()
+        tab_sal.staff=staff_obj
+        tab_sal.date=paymentdate
+        tab_sal.fixed_salary=fixed_salary
+        tab_sal.total_salary=fixed_salary
+        tab_sal.status=status
+        tab_sal.save()
+        return redirect("/salary_status/")
+
+def toggle_salary_status(request, sal_id):
+    if request.method == "POST":
+        salary = TableSalary.objects.get(id=sal_id)
+
+        if salary.status == "paid":
+            salary.status = "pending"
+        else:
+            salary.status = "paid"
+
+        salary.save()
+
+    return redirect("/salary_status/")
+
+
+def add_overtime(request,sal_id):
+    data=TableSalary.objects.get(id=sal_id)
+    return render(request,"add_overtime.html",{"data":data})
+
+def save_overtime(request):
+    if request.method == "POST":
+
+        salary_id = request.POST.get("salary_id")
+        salary_obj = TableSalary.objects.get(id=salary_id)
+
+        staff_obj = salary_obj.staff
+
+        ot_date = request.POST.get("ot_date")
+        ot_hours = float(request.POST.get("ot_hours") or 0)
+        ot_rate = float(request.POST.get("ot_amount") or 0)
+        ot_status = request.POST.get("ot_status")
+
+        # Calculate OT payment
+        ot_pay = ot_hours * ot_rate
+
+        # ---- Save overtime record ----
+        tab_ot=TableOvertime()
+        tab_ot.staff=staff_obj
+        tab_ot.salary=salary_obj
+        tab_ot.ot_date=ot_date
+        tab_ot.extra_hours=ot_hours
+        tab_ot.ot_amount=ot_rate
+        tab_ot.status=ot_status
+        tab_ot.save()
+
+        salary_obj.total_overtime += ot_pay
+        salary_obj.total_salary = salary_obj.fixed_salary + salary_obj.total_overtime
+        salary_obj.save()
+
+        return redirect("/salary_status/")
+
+
+def delete_overtime(request, sal_id):
+
+    salary = TableSalary.objects.get(id=sal_id)
+
+    overtime_records = TableOvertime.objects.filter(salary=salary)
+
+    if not overtime_records.exists():
+        messages.warning(request, "No overtime found.")
+        return redirect("/salary_status/")
+
+    # delete overtime records
+    overtime_records.delete()
+
+    # reset salary overtime values
+    salary.total_overtime = 0
+    salary.total_salary = salary.fixed_salary
+    salary.save()
+
+    messages.success(request, "Overtime deleted successfully.")
+
+    return redirect("/salary_status/")
+
+
+def edit_salary_status(request,stf_id):
+    if request.method == "POST":
+        salary = TableSalary.objects.get(id=stf_id)
+        salary.status = request.POST.get("status")
+        salary.save()
+        return redirect("/salary_status/")
+
+def get_overtime_details(request, salary_id):
+
+    overtime_records = TableOvertime.objects.filter(
+        salary_id=salary_id
+    ).order_by("ot_date")
+
+    data = []
+
+    for ot in overtime_records:
+        data.append({
+            "date": ot.ot_date.strftime("%Y-%m-%d") if ot.ot_date else "N/A",
+            "hours": ot.extra_hours or 0
+        })
+
+    return JsonResponse(data, safe=False)
+
+from django.db.models import Q
+
+def salary_history(request):
+
+    data = TableSalary.objects.all().order_by("-id")
+
+    search_staff = request.GET.get("search_staff")
+    search_status = request.GET.get("search_status")
+    search_month = request.GET.get("search_month")
+
+
+    # 🔍 Staff search
+    if search_staff:
+        data = data.filter(
+            Q(staff__staffid__icontains=search_staff) |
+            Q(staff__name__icontains=search_staff)
+        )
+
+    # 🔍 Status filter
+    if search_status:
+        data = data.filter(status=search_status)
+
+    # 🔍 Month filter (IMPORTANT FIX)
+    if search_month:
+        data = data.filter(date__startswith=search_month)
+
+    return render(request, "salary_history.html", {"data": data})
+
+
+def export_salary_csv(request):
+
+    data = TableSalary.objects.all().order_by("-id")
+
+    search_staff = request.GET.get("search_staff")
+    search_status = request.GET.get("search_status")
+    search_month = request.GET.get("search_month")
+
+    # Apply filters
+    if search_staff:
+        data = data.filter(
+            Q(staff__staffid__icontains=search_staff) |
+            Q(staff__name__icontains=search_staff)
+        )
+
+    if search_status:
+        data = data.filter(status=search_status)
+
+    if search_month:
+        try:
+            selected_date = datetime.strptime(search_month, "%Y-%m")
+            data = data.filter(
+                date__year=selected_date.year,
+                date__month=selected_date.month
+            )
+        except:
+            pass
+
+    # ✅ Create CSV response
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="salary_history.csv"'
+
+    writer = csv.writer(response)
+
+    # Header row
+    writer.writerow([
+        "Staff ID",
+        "Staff Name",
+        "Date",
+        "Fixed Salary",
+        "Overtime",
+        "Total Salary",
+        "Status"
+    ])
+
+    # Data rows
+    for row in data:
+        writer.writerow([
+            row.staff.staffid if row.staff else "",
+            row.staff.name if row.staff else "",
+            row.date,
+            row.fixed_salary,
+            row.total_overtime,
+            row.total_salary,
+            row.status
+        ])
+
+    return response
+
+

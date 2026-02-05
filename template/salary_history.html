@@ -12,43 +12,47 @@
                             <h6 class="mb-4">Staff Salary History</h6>
                             <div class="filter-container">
 
-                                <form method="get" class="d-flex gap-2 align-items-end ms-4">
-                                <div>
-                                    <label class="form-label text-xs fw-bold">Search</label>
-                                    <input type="search"
-                                           class="form-control form-control-sm bg-dark text-light"
-                                           placeholder="Staff id/Name"
-                                           name="search_staff"
-                                           value="{{ request.GET.search_staff }}">
-                                </div>
-                                <div>
-                                    <label class="form-label text-xs fw-bold">Salary Status</label>
-                                    <select name="search_status" class="form-select form-select-sm">
-                                        <option value="">All Statuses</option>
-                                        <option value="paid" {% if request.GET.search_status == "paid" %}selected{% endif %}>Paid</option>
-                                        <option value="pending" {% if request.GET.search_status == "pending" %}selected{% endif %}>Pending</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="form-label text-xs fw-bold">Month</label>
-                                    <input type="month"
-                                           name="search_month"
-                                           value="{{ request.GET.month }}"
-                                           class="form-control form-control-sm bg-light text-dark">
-                                </div>
+                                <form method="get" class="d-flex flex-wrap gap-2 align-items-end ms-4">
+                                    <div class="flex-grow-1 flex-md-grow-0" style="min-width: 150px;">
+                                        <label class="form-label text-xs fw-bold">Search</label>
+                                        <input type="search"
+                                               class="form-control form-control-sm bg-dark text-light"
+                                               placeholder="Staff id/Name"
+                                               name="search_staff"
+                                               value="{{ request.GET.search_staff }}">
+                                    </div>
 
-                                <button type="submit" class="btn btn-sm btn-primary">
-                                    Filter
-                                </button>
-                                <a href="/salary_history/" class="btn btn-sm btn-outline-primary">
-                                    Clear
-                                </a>
-                                <button type="button" onclick="exportData()" class="btn btn-link text-success p-0 me-3">
-                                    <i class="fas fa-download"></i> Export Data
-                                </button>
-                            </form>
+                                    <div class="flex-grow-1 flex-md-grow-0" style="min-width: 150px;">
+                                        <label class="form-label text-xs fw-bold">Salary Status</label>
+                                        <select name="search_status" class="form-select form-select-sm">
+                                            <option value="">All Statuses</option>
+                                            <option value="paid" {% if request.GET.search_status == "paid" %}selected{% endif %}>Paid</option>
+                                            <option value="pending" {% if request.GET.search_status == "pending" %}selected{% endif %}>Pending</option>
+                                        </select>
+                                    </div>
 
-                            </div>
+                                    <div class="flex-grow-1 flex-md-grow-0" style="min-width: 150px;">
+                                        <label class="form-label text-xs fw-bold">Month</label>
+                                        <input type="month"
+                                               name="search_month"
+                                               value="{{ request.GET.month }}"
+                                               class="form-control form-control-sm bg-light text-dark">
+                                    </div>
+
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        Filter
+                                    </button>
+
+                                    <a href="/salary_history/" class="btn btn-sm btn-outline-primary">
+                                        Clear
+                                    </a>
+
+                                    <button type="button" onclick="exportData()" class="btn btn-link text-success p-0 me-3">
+                                        <i class="fas fa-download"></i>Export
+                                    </button>
+
+                                </form>
+                            </div><br>
 
                             <div class="table-responsive">
                                 <table class="table">
@@ -60,6 +64,8 @@
                                             <th scope="col">Salary Date</th>
                                             <th scope="col">Salary</th>
                                             <th scope="col">Over Time</th>
+                                            <th scope="col">Advance Payment</th>
+                                            <th scope="col">Pending Amount</th>
                                             <th scope="col">Total salary</th>
                                             <th scope="col">Status</th>
 
@@ -74,48 +80,105 @@
                                             <td>{{i.date}}</td>
                                             <td>{{i.fixed_salary}}</td>
                                             <td>{{i.total_overtime}}</td>
+                                            <td>{{ i.advance_sum|default:0 }}</td>
+                                            <td>{{ i.pending_sum|default:0 }}</td>
                                             <td>{{i.total_salary}}</td>
                                             <td>
 
                                                 <small>
-                                                    {% if i.status == "paid" %}
-                                                        Paid
-                                                    {% else %}
-                                                        Pending
-                                                    {% endif %}
+                                                    {{i.status | capfirst}}<br>
+                                                    <button class="btn btn-sm btn-outline-primary py-0 px-1"
+                                                          data-bs-toggle="modal"
+                                                          data-bs-target="#statusModal{{ i.id }}">
+                                                    ✏️
+                                                    </button>
                                                 </small>
 
                                             </td>
 
 
-<!--                                            <td>-->
-<!--                                                <a href="/add_overtime/{{i.id}}" >Add Overtime</a>-->
-
-<!--                                                <br><br>-->
-
-<!--                                                {% if i.total_overtime != 0 %}-->
-
-<!--                                                <a href="#"-->
-<!--                                                   data-bs-toggle="modal"-->
-<!--                                                   data-bs-target="#overtimeModal"-->
-<!--                                                   data-id="{{ i.id }}"-->
-<!--                                                   data-name="{{ i.staff.name }}"-->
-<!--                                                   data-overtime="{{ i.total_overtime }}">-->
-<!--                                                   Over time details-->
-<!--                                                </a>-->
-
-<!--                                                {% endif %}-->
-<!--                                            </td>-->
-
-
                                         </tr>
                                     </tbody>
+                                    <div class="modal fade" id="statusModal{{ i.id }}" tabindex="-1">
+                                      <div class="modal-dialog modal-sm modal-dialog-centered">
+                                        <div class="modal-content">
+                                          <form method="post" action="{% url 'update_pay_status' i.id %}">
+                                            {% csrf_token %}
+                                            <div class="modal-header py-2">
+                                              <h6 class="modal-title">Update Status</h6>
+                                              <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal"></button>
+                                            </div>
+
+                                            <div class="modal-body py-2">
+                                              <select name="status" class="form-select form-select-sm" required>
+                                                <option value="paid" {% if i.status == "paid" %}selected{% endif %}>Paid</option>
+                                                <option value="pending" {% if i.status == "pending" %}selected{% endif %}>Pending</option>
+                                              </select>
+                                            </div>
+
+                                            <div class="modal-footer py-1">
+                                              <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                            </div>
+                                          </form>
+                                        </div>
+                                      </div>
+                                    </div>
                                     {% endfor %}
                                 </table>
+
                             </div>
                         </div>
                 </div>
             </div>
+                                <nav>
+                                    <ul class="pagination pagination-sm justify-content-center mt-3">
+
+                                        {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                «
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">«</span>
+                                        </li>
+                                        {% endif %}
+
+                                        {% for num in page_obj.paginator.page_range %}
+                                            {% if page_obj.number == num %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ num }}</span>
+                                                </li>
+                                            {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+                                                <li class="page-item">
+                                                    <a class="page-link"
+                                                       href="?page={{ num }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                        {{ num }}
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                »
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">»</span>
+                                        </li>
+                                        {% endif %}
+
+                                    </ul>
+                                </nav>
+                                <p class="text-center text-muted small">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </p>
 
             <!-- table End -->
             <div class="modal fade" id="statusModal" tabindex="-1">
@@ -172,8 +235,8 @@
 
 
         <!-- Back to Top -->
-        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
-    </div>
+<!--        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>-->
+<!--    </div>-->
 
 
     <div class="modal fade" id="selectMeasurementModal" tabindex="-1" aria-hidden="true">

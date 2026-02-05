@@ -26,6 +26,24 @@
                 <div class="col-12">
                         <div class="bg-secondary rounded h-100 p-4">
                             <h6 class="mb-4">Staffs</h6>
+                            <form method="get" class="d-flex flex-wrap gap-2 align-items-end ms-4">
+                                <div class="flex-grow-1 flex-md-grow-0" style="min-width: 180px;">
+                                    <label class="form-label small fw-bold">Search</label>
+                                    <input type="search"
+                                           class="form-control bg-dark text-light border border-secondary"
+                                           placeholder="Name/ID/phone/role/email"
+                                           name="search_general"
+                                           value="{{ request.GET.search_general }}">
+                                </div>
+
+                                <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+                                <a href="/staff_details/" class="btn btn-sm btn-outline-primary">Clear</a>
+                                <button type="button"
+                                            onclick="exportData()"
+                                            class="btn btn-link text-success p-0">
+                                        <i class="fas fa-download"></i>Export
+                                    </button>
+                            </form><br>
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
@@ -64,6 +82,55 @@
                                     </tbody>
                                     {% endfor %}
                                 </table>
+                                <nav>
+                                    <ul class="pagination pagination-sm justify-content-center mt-3">
+
+                                        {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                «
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">«</span>
+                                        </li>
+                                        {% endif %}
+
+                                        {% for num in page_obj.paginator.page_range %}
+                                            {% if page_obj.number == num %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ num }}</span>
+                                                </li>
+                                            {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+                                                <li class="page-item">
+                                                    <a class="page-link"
+                                                       href="?page={{ num }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                        {{ num }}
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                »
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">»</span>
+                                        </li>
+                                        {% endif %}
+
+                                    </ul>
+                                </nav>
+                                <p class="text-center text-muted small">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </p>
                             </div>
                         </div>
                 </div>
@@ -75,9 +142,6 @@
         <!-- Content End -->
 
 
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
-    </div>
 
 
     <div class="modal fade" id="selectMeasurementModal" tabindex="-1" aria-hidden="true">
@@ -134,6 +198,12 @@
                 document.getElementById('sareeLink').href =
                     `/add_saree_measurement/${customerId}/`;
             });
+    </script>
+    <script>
+        function exportData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            window.location.href = "{% url 'export_staff_details_csv' %}?" + urlParams.toString();
+        }
     </script>
 </body>
 

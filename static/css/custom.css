@@ -61,8 +61,9 @@
 }
 
 body {
-    background-color: yellow !important;
+    background-color: #f8f9fa !important;
 }
+
 
 .btn-secondary {
     background-color: #fff5f5 !important;
@@ -120,3 +121,20 @@ input, .form-control {
     border-radius: 8px;
 }
 
+.form-switch .form-check-input {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+.form-switch .form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+.form-check-input {
+    background-color: #fff;      /* unchecked = white */
+    border: 1px solid #ccc;
+}
+
+.form-check-input:checked {
+    background-color: red;       /* keep your red */
+    border-color: red;
+}

@@ -26,8 +26,9 @@
                         <div class="bg-secondary rounded h-100 p-4">
                             <h6 class="mb-4">For churidar set,gown and frock</h6>
 
-                            <form method="get" class="d-flex align-items-end gap-3 ms-4">
-                                <div style="min-width: 420px;">
+                            <form method="get" class="d-flex flex-wrap gap-2 align-items-end ms-4">
+
+                                <div class="flex-grow-1 flex-md-grow-0" style="min-width: 180px;">
                                     <label class="form-label small fw-bold">Search</label>
                                     <input type="search"
                                            class="form-control bg-dark text-light border border-secondary"
@@ -36,14 +37,22 @@
                                            value="{{ request.GET.search_chd }}">
                                 </div>
 
-                                <button type="submit" class="btn btn-sm btn-primary">Filter</button>
-                                <a href="/measurements/" class="btn btn-sm btn-outline-primary">Clear</a>
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    Filter
+                                </button>
+
+                                <a href="/measurements/" class="btn btn-sm btn-outline-primary">
+                                    Clear
+                                </a>
+
                                 <button type="submit"
                                         formaction="{% url 'export_churidar_csv' %}"
                                         class="btn btn-link text-success p-0 me-3">
-                                    <i class="fas fa-download"></i> Export CSV
+                                    <i class="fas fa-download"></i> Export
                                 </button>
+
                             </form>
+
                             <br><br>
 
                             <div class="table-responsive">
@@ -149,6 +158,36 @@
                                     </tbody>
                                     {% endfor %}
                                 </table>
+                                <nav>
+                                    <ul class="pagination pagination-sm justify-content-center mt-3">
+                                        {% if chd.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?chd_page={{ chd.previous_page_number }}&{{ request.GET.urlencode|cut:'chd_page=' }}">«</a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled"><span class="page-link">«</span></li>
+                                        {% endif %}
+
+                                        {% for num in chd.paginator.page_range %}
+                                            {% if chd.number == num %}
+                                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                            {% elif num > chd.number|add:'-2' and num < chd.number|add:'2' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?chd_page={{ num }}&{{ request.GET.urlencode|cut:'chd_page=' }}">{{ num }}</a>
+                                            </li>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if chd.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?chd_page={{ chd.next_page_number }}&{{ request.GET.urlencode|cut:'chd_page=' }}">»</a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled"><span class="page-link">»</span></li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                                <p class="text-center text-muted small">Page {{ chd.number }} of {{ chd.paginator.num_pages }}</p>
                             </div>
                         </div>
                 </div>
@@ -279,6 +318,36 @@
                                     </tbody>
                                     {% endfor %}
                                 </table>
+                                <nav>
+                                    <ul class="pagination pagination-sm justify-content-center mt-3">
+                                        {% if sar.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?sar_page={{ sar.previous_page_number }}&{{ request.GET.urlencode|cut:'sar_page=' }}">«</a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled"><span class="page-link">«</span></li>
+                                        {% endif %}
+
+                                        {% for num in sar.paginator.page_range %}
+                                            {% if sar.number == num %}
+                                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                            {% elif num > sar.number|add:'-2' and num < sar.number|add:'2' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?sar_page={{ num }}&{{ request.GET.urlencode|cut:'sar_page=' }}">{{ num }}</a>
+                                            </li>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if sar.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?sar_page={{ sar.next_page_number }}&{{ request.GET.urlencode|cut:'sar_page=' }}">»</a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled"><span class="page-link">»</span></li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                                <p class="text-center text-muted small">Page {{ sar.number }} of {{ sar.paginator.num_pages }}</p>
                             </div>
                         </div>
                 </div>
@@ -292,9 +361,6 @@
         <!-- Content End -->
 
 
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
-    </div>
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>

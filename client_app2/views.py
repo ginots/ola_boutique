@@ -1,6 +1,8 @@
 import csv
 import datetime
 from datetime import date
+from django.contrib.auth.decorators import login_required
+
 
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
@@ -17,7 +19,7 @@ from .models import *
 
 
 # Create your views here.
-
+@login_required(login_url='/')
 def index(request):
     today = timezone.localdate()
     year = today.year
@@ -60,11 +62,12 @@ def index(request):
     return render(request, "index.html", context)
 
 
-
+@login_required(login_url='/')
 def new_order(request, cust_id):
     data = TableCustomer.objects.get(id=cust_id)
     return render(request,"new_order.html",{"data":data})
 
+@login_required(login_url='/')
 @transaction.atomic
 def save_order(request):
     if request.method == "POST":
@@ -131,8 +134,9 @@ def save_order(request):
                                     status=status)
 
         return redirect("all_orders")
+    return redirect("all_orders")
 
-
+@login_required(login_url='/')
 def all_orders(request):
     orders = TableOrders.objects.all().order_by("-id")
 
@@ -164,7 +168,7 @@ def all_orders(request):
 
     return render(request, "all_orders.html", {"orders": page_obj,"page_obj":page_obj})
 
-
+@login_required(login_url='/')
 def update_order_status(request, order_id):
     if request.method == "POST":
         order = TableOrders.objects.get(id=order_id)
@@ -172,6 +176,7 @@ def update_order_status(request, order_id):
         order.save()
     return redirect("all_orders")
 
+@login_required(login_url='/')
 def export_orders_csv(request):
     orders = TableOrders.objects.all().order_by("-id")
 
@@ -234,13 +239,24 @@ def export_orders_csv(request):
         )
     return response
 
+@login_required(login_url='/')
 def ongoing_orders(request):
     orders = TableOrders.objects.filter(status="Ordered").order_by("-id")
+    order_count = orders.count()
+    money = orders.aggregate(
+        total_sum=Sum("total"),
+        advance_sum=Sum("advance_paid"),
+        balance_sum=Sum("balance")
+    )
     paginator = Paginator(orders, 10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    return render(request, "ongoing_orders.html", {"orders": page_obj, "page_obj":page_obj})
+    return render(request, "ongoing_orders.html", {"orders": page_obj, "page_obj":page_obj,
+                                                   "order_count":order_count,"total":money["total_sum"] or 0,
+                                                   "advance": money["advance_sum"] or 0,
+                                                   "balance": money["balance_sum"] or 0,})
 
+@login_required(login_url='/')
 def stock(request):
     sto = TableStock.objects.all().order_by("-id")
     q_search = request.GET.get('search_item')
@@ -252,6 +268,7 @@ def stock(request):
     page_obj = paginator.get_page(page_number)
     return render(request, "stock.html",{"sto": page_obj, "page_obj":page_obj})
 
+@login_required(login_url='/')
 def export_stock_csv(request):
     sto = TableStock.objects.all().order_by("-id")
     q_search = request.GET.get('search_item')
@@ -281,9 +298,11 @@ def export_stock_csv(request):
         )
     return response
 
+@login_required(login_url='/')
 def add_stock(request):
         return render(request, "add_stock.html")
 
+@login_required(login_url='/')
 def save_stock(request):
     if request.method == "POST":
         item = request.POST.get("item")
@@ -293,12 +312,14 @@ def save_stock(request):
         notes = request.POST.get("notes")
         TableStock.objects.create(item=item, stock=stock, unit=unit, notes=notes, low_stock=low_stock)
         return redirect("stock")
+    return redirect("stock")
 
-
+@login_required(login_url='/')
 def edit_stock(request, stock_id):
     sto = TableStock.objects.get(id=stock_id)
     return render(request, "edit_stock.html", {"sto": sto})
 
+@login_required(login_url='/')
 def update_stock(request, stock_id):
     if request.method == "POST":
         item = request.POST.get("item")
@@ -315,16 +336,20 @@ def update_stock(request, stock_id):
         tab_obj.notes = notes
         tab_obj.save()
         return redirect("stock")
+    return redirect("stock")
 
+@login_required(login_url='/')
 def delete_stock(request, stock_id):
     tab_obj = TableStock.objects.get(id=stock_id)
     tab_obj.delete()
     return redirect("stock")
 
+@login_required(login_url='/')
 def used_stock(request, stock_id):
     sto = TableStock.objects.get(id=stock_id)
     return render(request, "used_stock.html", {"sto": sto})
 
+@login_required(login_url='/')
 def save_used_stock(request, stock_id):
     if request.method == "POST":
         used_stock = float(request.POST.get("used_stock"))
@@ -332,7 +357,9 @@ def save_used_stock(request, stock_id):
         tab_obj.stock = tab_obj.stock - used_stock
         tab_obj.save()
         return redirect("stock")
+    return redirect("stock")
 
+@login_required(login_url='/')
 def invoice(request, inv_id):
     data = TableOrders.objects.get(id=inv_id)
     return render(request, "invoice.html", {"data": data})
@@ -366,6 +393,7 @@ def sign_out(request):
     logout(request)
     return redirect("/")
 
+@login_required(login_url='/')
 def profile(request):
     return render(request, "profile.html")
 

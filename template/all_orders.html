@@ -59,11 +59,11 @@
                                     <button type="button"
                                             onclick="exportData()"
                                             class="btn btn-link text-success p-0">
-                                        <i class="fas fa-download"></i>
+                                        <i class="fas fa-download"></i>Export
                                     </button>
                                 </div>
 
-                            </form>
+                            </form><br>
 
 
                             <div class="table-responsive">
@@ -140,7 +140,7 @@
                                                 ✏️
                                               </button>
                                             </td>
-                                            <td><a class="btn btn-sm btn-primary" href="{% url 'invoice' i.id %}">Invoice</a></td>
+                                            <td><a class="btn btn-sm btn-outline-danger" href="{% url 'invoice' i.id %}">Invoice</a></td>
 
 
                                         </tr>
@@ -173,6 +173,12 @@
 
                                     {% endfor %}
                                 </table>
+
+                            </div>
+                        </div>
+                </div>
+            </div>
+
                                 <nav>
                                     <ul class="pagination pagination-sm justify-content-center mt-3">
 
@@ -222,10 +228,6 @@
                                 <p class="text-center text-muted small">
                                     Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
                                 </p>
-                            </div>
-                        </div>
-                </div>
-            </div>
 
             <!-- table End -->
 

@@ -1,17 +1,20 @@
 import csv
 from datetime import date, datetime
 from django.contrib import messages
-from django.db.models import Q
+from django.core.paginator import Paginator
+from django.db.models import Q,Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.template.context_processors import request
+from django.contrib.auth.decorators import login_required
+
 
 from .models import *
 
 
 # Create your views here.
 
-
+@login_required(login_url='/')
 def customers(request):
     cust=TableCustomer.objects.all().order_by("-id")
     q_searched=request.GET.get("search_general")
@@ -21,11 +24,47 @@ def customers(request):
                          Q(custid__iexact=q_searched)|
                          Q(email__icontains=q_searched)|
                          Q(phone__icontains=q_searched))
-    return render(request,"customers.html",{"cust":cust})
 
+    paginator = Paginator(cust, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request,"customers.html",{"cust":page_obj, "page_obj":page_obj})
+
+@login_required(login_url='/')
+def export_customers_csv(request):
+    cust = TableCustomer.objects.all().order_by("-id")
+    q_searched = request.GET.get("search_general")
+
+    if q_searched:
+        cust = cust.filter(Q(name__icontains=q_searched) |
+                           Q(custid__iexact=q_searched) |
+                           Q(email__icontains=q_searched) |
+                           Q(phone__icontains=q_searched))
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="customer-details.csv"'
+
+    writer = csv.writer(response)
+
+    writer.writerow([
+        "Customer Name", "Customer ID",
+        "Phone Number", "Email",
+        "Address"
+    ])
+
+    for i in cust:
+        writer.writerow([
+            i.name, i.custid,
+            i.phone, i.email, i.address
+        ])
+
+    return response
+
+@login_required(login_url='/')
 def add_customer(request):
     return render(request,"add_customer.html")
 
+@login_required(login_url='/')
 def save_customer(request):
 
     if request.method == "POST":
@@ -42,10 +81,12 @@ def save_customer(request):
         tab_cust.save()
         return redirect("/customers/")
 
+@login_required(login_url='/')
 def edit_customer(request,cust_id):
     data=TableCustomer.objects.get(id=cust_id)
     return render(request,"edit_customer.html",{"data":data})
 
+@login_required(login_url='/')
 def update_customer(request,cust_id):
     if request.method == "POST":
         name=request.POST.get("name")
@@ -61,12 +102,13 @@ def update_customer(request,cust_id):
         tab_cust.save()
         return redirect("/customers/")
 
+@login_required(login_url='/')
 def delete_customer(request,cust_id):
     data=TableCustomer.objects.get(id=cust_id)
     data.delete()
     return redirect("/customers/")
 
-
+@login_required(login_url='/')
 def measurements(request):
     chd=TableChuridar.objects.all().order_by("-id")
     sar=TableSaree.objects.all().order_by("-id")
@@ -90,12 +132,22 @@ def measurements(request):
             Q(customer__phone__icontains=search_sar)
         ).distinct()
 
-    return render(request,"measurements.html",{"chd":chd,"sar":sar})
+    sar_paginator = Paginator(sar, 10)
+    sar_page_number = request.GET.get("sar_page")
+    sar_page_obj = sar_paginator.get_page(sar_page_number)
 
+    chd_paginator = Paginator(chd, 10)
+    chd_page_number = request.GET.get("chd_page")
+    chd_page_obj = chd_paginator.get_page(chd_page_number)
+
+    return render(request,"measurements.html",{"chd":chd_page_obj,"sar":sar_page_obj})
+
+@login_required(login_url='/')
 def add_churidar_measurement(request,cust_id):
     cust=TableCustomer.objects.get(id=cust_id)
     return render(request,"add_churidar_measurement.html",{"cust":cust})
 
+@login_required(login_url='/')
 def save_ch_measure(request):
     if request.method=="POST":
         cid= request.POST.get("customer_id")
@@ -136,10 +188,12 @@ def save_ch_measure(request):
         tab_chd.save()
         return redirect("/measurements/")
 
+@login_required(login_url='/')
 def edit_chmeasure(request,cust_id):
     data=TableChuridar.objects.get(id=cust_id)
     return render(request,"edit_chmeasure.html",{"data":data})
 
+@login_required(login_url='/')
 def update_ch_measure(request,cust_id):
     if request.method=="POST":
 
@@ -176,15 +230,18 @@ def update_ch_measure(request,cust_id):
         tab_chd.save()
         return redirect("/measurements/")
 
+@login_required(login_url='/')
 def delete_chmeasure(request,cust_id):
     data=TableChuridar.objects.get(id=cust_id)
     data.delete()
     return redirect("/measurements/")
 
+@login_required(login_url='/')
 def add_saree_measurement(request,cust_id):
     cust=TableCustomer.objects.get(id=cust_id)
     return render(request,"add_saree_measurement.html",{"cust":cust})
 
+@login_required(login_url='/')
 def save_sr_measure(request):
     if request.method == "POST":
         cid=request.POST.get("customer_id")
@@ -220,10 +277,12 @@ def save_sr_measure(request):
         tab_sr.save()
         return redirect("/measurements/")
 
+@login_required(login_url='/')
 def edit_srmeasure(request,cust_id):
     data=TableSaree.objects.get(id=cust_id)
     return render(request,"edit_srmeasure.html",{"data":data})
 
+@login_required(login_url='/')
 def update_sr_measure(request,cust_id):
     if request.method=="POST":
 
@@ -257,12 +316,13 @@ def update_sr_measure(request,cust_id):
         tab_sr.save()
         return redirect("/measurements/")
 
+@login_required(login_url='/')
 def delete_srmeasure(request,cust_id):
     data=TableSaree.objects.get(id=cust_id)
     data.delete()
     return redirect("/measurements/")
 
-
+@login_required(login_url='/')
 def export_churidar_csv(request):
     search = request.GET.get("search_chd", "").strip()
 
@@ -308,7 +368,7 @@ def export_churidar_csv(request):
 
     return response
 
-
+@login_required(login_url='/')
 def export_saree_csv(request):
     search = request.GET.get("search_sar", "").strip()
 
@@ -354,14 +414,59 @@ def export_saree_csv(request):
 
     return response
 
+@login_required(login_url='/')
 def staff_details(request):
-    staff=TableStaffs.objects.all()
-    return render(request,"staff_details.html",{"staff":staff})
+    staff=TableStaffs.objects.all().order_by("-id")
+    q_searched = request.GET.get("search_general")
 
+    if q_searched:
+        staff = staff.filter(Q(name__icontains=q_searched) |
+                           Q(staffid__iexact=q_searched) |
+                           Q(email__icontains=q_searched) |
+                           Q(phone__icontains=q_searched) |
+                           Q(role__icontains=q_searched))
+    paginator = Paginator(staff, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request,"staff_details.html",{"staff":page_obj,"page_obj":page_obj})
+
+@login_required(login_url='/')
+def export_staff_details_csv(request):
+    staff=TableStaffs.objects.all().order_by("-id")
+    q_searched = request.GET.get("search_general")
+
+    if q_searched:
+        staff = staff.filter(Q(name__icontains=q_searched) |
+                             Q(staffid__iexact=q_searched) |
+                             Q(email__icontains=q_searched) |
+                             Q(phone__icontains=q_searched) |
+                             Q(role__icontains=q_searched))
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="staff-details.csv"'
+
+    writer = csv.writer(response)
+
+    writer.writerow([
+        "Staff Name", "Staff ID",
+        "Phone Number", "Email",
+        "Address", "Role", "Salary", "Status"
+    ])
+
+    for i in staff:
+        writer.writerow([
+            i.name, i.staffid,
+            i.phone, i.email, i.address,
+            i.role, i.monthly_salary, i.status
+        ])
+
+    return response
+
+@login_required(login_url='/')
 def add_staff(request):
     return render(request,"add_staff.html")
 
-
+@login_required(login_url='/')
 def save_staff(request):
     if request.method=="POST":
         tab_stf=TableStaffs()
@@ -375,10 +480,12 @@ def save_staff(request):
         tab_stf.save()
         return redirect("/staff_details/")
 
+@login_required(login_url='/')
 def edit_staff(request,stf_id):
     data=TableStaffs.objects.get(id=stf_id)
     return render(request,"edit_staff.html",{"data":data})
 
+@login_required(login_url='/')
 def update_staff(request,stf_id):
     if request.method == "POST":
         tab_stf = TableStaffs.objects.get(id=stf_id)
@@ -391,10 +498,12 @@ def update_staff(request,stf_id):
         tab_stf.save()
         return redirect("/staff_details/")
 
+@login_required(login_url='/')
 def staff_emp(request):
     data=TableStaffs.objects.all().order_by("-id")
     return render(request,"staff_emp.html",{"data":data})
 
+@login_required(login_url='/')
 def update_emp(request):
     if request.method=="POST":
         name= request.POST.get("name")
@@ -405,7 +514,7 @@ def update_emp(request):
         tab_stf.save()
         return redirect("/staff_details/")
 
-
+@login_required(login_url='/')
 def salary_status(request):
 
     latest_salary = TableSalary.objects.order_by("-date").first()
@@ -417,19 +526,26 @@ def salary_status(request):
         sal = TableSalary.objects.filter(
             date__month=month,
             date__year=year
+        ).annotate(
+            advance_sum=Sum("tableextra__advance"),
+            pending_sum=Sum("tableextra__pending")
         ).order_by("-id")
 
     else:
         sal = TableSalary.objects.none()
 
-    return render(request, "salary_status.html", {"sal": sal})
+    paginator = Paginator(sal, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
 
+    return render(request, "salary_status.html", {"sal": page_obj, "page_obj":page_obj})
 
+@login_required(login_url='/')
 def salary_generate(request):
     return render(request,"salary_generate.html")
 
 
-
+@login_required(login_url='/')
 def generate_salary(request):
 
     if request.method == "POST":
@@ -478,12 +594,13 @@ def generate_salary(request):
                 fixed_salary=staff.monthly_salary,
                 total_overtime=0,
                 total_salary=staff.monthly_salary,
-                status="paid"
+                status="pending"
             )
 
         messages.success(request, "Salary generated successfully.")
         return redirect("/salary_status/")
 
+@login_required(login_url='/')
 def delete_salary(request):
 
     if request.method == "POST":
@@ -513,23 +630,95 @@ def delete_salary(request):
         messages.success(request, "Salary deleted successfully.")
         return redirect("/salary_status/")
 
+@login_required(login_url='/')
+def calculate_total_salary(salary_obj):
 
+    overtime_total = TableOvertime.objects.filter(
+        salary=salary_obj
+    ).aggregate(Sum("ot_amount"))["ot_amount__sum"] or 0
+
+    advance_total = TableExtra.objects.filter(
+        salary=salary_obj
+    ).aggregate(Sum("advance"))["advance__sum"] or 0
+
+    pending_total = TableExtra.objects.filter(
+        salary=salary_obj
+    ).aggregate(Sum("pending"))["pending__sum"] or 0
+
+    total = (
+        salary_obj.fixed_salary
+        + overtime_total
+        - advance_total
+        + pending_total
+    )
+
+    salary_obj.total_overtime = overtime_total
+    salary_obj.total_salary = total
+    salary_obj.save()
+
+@login_required(login_url='/')
 def save_salary(request):
-    if request.method=="POST":
+
+    if request.method == "POST":
+
         staff = request.POST.get("staff_id")
         staff_obj = TableStaffs.objects.get(id=staff)
+
         paymentdate = request.POST.get("date") or None
         fixed_salary = float(request.POST.get("salary") or 0)
-        status=request.POST.get("status")
-        tab_sal=TableSalary()
-        tab_sal.staff=staff_obj
-        tab_sal.date=paymentdate
-        tab_sal.fixed_salary=fixed_salary
-        tab_sal.total_salary=fixed_salary
-        tab_sal.status=status
-        tab_sal.save()
+        status = request.POST.get("status")
+
+        tab_sal = TableSalary.objects.create(
+            staff=staff_obj,
+            date=paymentdate,
+            fixed_salary=fixed_salary,
+            total_salary=fixed_salary,
+            status=status
+        )
+
+        calculate_total_salary(tab_sal)
+
         return redirect("/salary_status/")
 
+@login_required(login_url='/')
+def add_pending(request,sal_id):
+    data=TableSalary.objects.get(id=sal_id)
+    return render(request,"add_pending.html",{"data":data})
+
+@login_required(login_url='/')
+def save_pending(request, sal_id):
+
+    sal = TableSalary.objects.get(id=sal_id)
+
+    if request.method == "POST":
+        pending = float(request.POST.get("pending", 0))
+
+        TableExtra.objects.create(
+            salary=sal,
+            pending=pending
+        )
+
+        calculate_total_salary(sal)
+
+    return redirect("/salary_status/")
+
+# def save_salary(request):
+#     if request.method=="POST":
+#         staff = request.POST.get("staff_id")
+#         staff_obj = TableStaffs.objects.get(id=staff)
+#         paymentdate = request.POST.get("date") or None
+#         fixed_salary = float(request.POST.get("salary") or 0)
+#         status=request.POST.get("status")
+#         tab_sal=TableSalary()
+#         tab_sal.staff=staff_obj
+#         tab_sal.date=paymentdate
+#         tab_sal.fixed_salary=fixed_salary
+#         tab_sal.total_salary=fixed_salary
+#         tab_sal.status=status
+#         tab_sal.save()
+#         return redirect("/salary_status/")
+
+@login_required(login_url='/')
 def toggle_salary_status(request, sal_id):
     if request.method == "POST":
         salary = TableSalary.objects.get(id=sal_id)
@@ -543,11 +732,12 @@ def toggle_salary_status(request, sal_id):
 
     return redirect("/salary_status/")
 
-
+@login_required(login_url='/')
 def add_overtime(request,sal_id):
     data=TableSalary.objects.get(id=sal_id)
     return render(request,"add_overtime.html",{"data":data})
 
+@login_required(login_url='/')
 def save_overtime(request):
     if request.method == "POST":
 
@@ -559,7 +749,7 @@ def save_overtime(request):
         ot_date = request.POST.get("ot_date")
         ot_hours = float(request.POST.get("ot_hours") or 0)
         ot_rate = float(request.POST.get("ot_amount") or 0)
-        ot_status = request.POST.get("ot_status")
+
 
         # Calculate OT payment
         ot_pay = ot_hours * ot_rate
@@ -571,7 +761,6 @@ def save_overtime(request):
         tab_ot.ot_date=ot_date
         tab_ot.extra_hours=ot_hours
         tab_ot.ot_amount=ot_rate
-        tab_ot.status=ot_status
         tab_ot.save()
 
         salary_obj.total_overtime += ot_pay
@@ -580,7 +769,7 @@ def save_overtime(request):
 
         return redirect("/salary_status/")
 
-
+@login_required(login_url='/')
 def delete_overtime(request, sal_id):
 
     salary = TableSalary.objects.get(id=sal_id)
@@ -629,14 +818,19 @@ def get_overtime_details(request, salary_id):
 
 from django.db.models import Q
 
+from django.db.models import Sum, Q
+
+@login_required(login_url='/')
 def salary_history(request):
 
-    data = TableSalary.objects.all().order_by("-id")
+    data = TableSalary.objects.annotate(
+        advance_sum=Sum("tableextra__advance"),
+        pending_sum=Sum("tableextra__pending")
+    ).order_by("-id")
 
     search_staff = request.GET.get("search_staff")
     search_status = request.GET.get("search_status")
     search_month = request.GET.get("search_month")
-
 
     # 🔍 Staff search
     if search_staff:
@@ -649,13 +843,21 @@ def salary_history(request):
     if search_status:
         data = data.filter(status=search_status)
 
-    # 🔍 Month filter (IMPORTANT FIX)
+    # 🔍 Month filter
     if search_month:
         data = data.filter(date__startswith=search_month)
 
-    return render(request, "salary_history.html", {"data": data})
+    paginator = Paginator(data, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "salary_history.html", {
+        "data": page_obj,
+        "page_obj": page_obj
+    })
 
 
+@login_required(login_url='/')
 def export_salary_csv(request):
 
     data = TableSalary.objects.all().order_by("-id")
@@ -715,4 +917,33 @@ def export_salary_csv(request):
 
     return response
 
+@login_required(login_url='/')
+def update_pay_status(request, pay_id):
+    if request.method == "POST":
+        pay = TableSalary.objects.get(id=pay_id)
+        pay.status = request.POST.get("status")
+        pay.save()
+        return redirect("/salary_history/")
+
+@login_required(login_url='/')
+def add_advance(request, sal_id):
+    data = TableSalary.objects.get(id=sal_id)
+    return render(request, "add_advance.html", {"data": data})
+
+@login_required(login_url='/')
+def save_advance(request, sal_id):
+
+    sal = TableSalary.objects.get(id=sal_id)
+
+    if request.method == "POST":
+        advance = float(request.POST.get("advance", 0))
+
+        TableExtra.objects.create(
+            salary=sal,
+            advance=advance
+        )
+
+        calculate_total_salary(sal)
+
+    return redirect("/salary_status/")
 

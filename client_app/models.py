@@ -140,8 +140,12 @@ class TableOvertime(models.Model):
     ot_date = models.DateField(null=True)
     extra_hours = models.FloatField(null=True)
     ot_amount = models.FloatField(null=True)
-    status = models.CharField(max_length=20,choices=[('pending', 'Pending'), ('paid', 'Paid')],default='pending')
     salary = models.ForeignKey(TableSalary,on_delete=models.CASCADE,null=True)
     created_date = models.DateTimeField(auto_now_add=True)
+
+class TableExtra(models.Model):
+    salary=models.ForeignKey(TableSalary,on_delete=models.CASCADE,null=True)
+    advance=models.FloatField(null=True,default=0)
+    pending=models.FloatField(null=True,default=0)
 
 

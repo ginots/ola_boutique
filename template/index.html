@@ -93,7 +93,7 @@
                     <div class="table-responsive">
                         <table class="table text-start align-middle table-bordered table-hover mb-0">
                             <thead>
-                                <tr class="text-white">
+                                <tr class="text-dark">
                                     <th scope="col">Date</th>
                                     <th scope="col">Order ID</th>
                                     <th scope="col">Customer</th>
@@ -110,7 +110,7 @@
                                     <td>{{i.name}}</td>
                                     <td>{{i.total}}</td>
                                     <td>{{i.status}}</td>
-                                    <td><a class="btn btn-sm btn-primary" href="{% url 'invoice' i.id %}">View/Download</a></td>
+                                    <td><a class="btn btn-sm btn-outline-danger" href="{% url 'invoice' i.id %}">View/Download</a></td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -179,29 +179,29 @@
                 plugins: {
                     legend: {
                         labels: {
-                            color: '#fff'
+                            color: '#212529'
                         }
                     }
                 },
                 scales: {
                     x: {
                         ticks: {
-                            color: '#bbb'
+                            color: '#212529'
                         },
                         grid: {
-                            color: 'rgba(255,255,255,0.08)',  // subtle grid
+                            color: 'rgba(0,0,0,0.1)',
                             drawBorder: false
                         }
                     },
                     y: {
                         ticks: {
-                            color: '#bbb',
+                            color: '#212529',
                             callback: function(value) {
                                 return '₹' + value;
                             }
                         },
                         grid: {
-                            color: 'rgba(255,255,255,0.08)',  // subtle grid
+                            color: 'rgba(0,0,0,0.1)',
                             drawBorder: false
                         }
                     }
@@ -239,20 +239,26 @@
                 scales: {
                     y: {
                         beginAtZero: true,
+                        ticks: {
+                            color: '#212529'
+                        },
                         grid: {
-                            color: "rgba(255,255,255,0.1)"
+                            color: 'rgba(0,0,0,0.1)'
                         }
                     },
                     x: {
+                        ticks: {
+                            color: '#212529'
+                        },
                         grid: {
-                            color: "rgba(255,255,255,0.1)"
+                            color: 'rgba(0,0,0,0.1)'
                         }
                     }
                 },
                 plugins: {
                     legend: {
                         labels: {
-                            color: "#fff"
+                            color: '#212529'
                         }
                     }
                 }

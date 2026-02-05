@@ -19,7 +19,7 @@
                 <form method="post" action="/delete_salary/">
                     {% csrf_token %}
 
-                    <input type="month" name="month" class="form-control-sm bg-light text-dark" required>
+                    <input type="month" name="month" class="form-control-sm " required>
 
                     <button type="submit" class="btn btn-danger"
                     onclick="return confirm('Are you sure you want to delete salary for this month?')">
@@ -41,8 +41,10 @@
                                             <th scope="col">Salary Date</th>
                                             <th scope="col">Salary</th>
                                             <th scope="col">Over Time</th>
-                                            <th scope="col">Total salary</th>
+                                            <th scope="col">Advance Payment</th>
                                             <th scope="col">Status</th>
+                                            <th scope="col">Pending Amount</th>
+                                            <th scope="col">Total salary</th>
                                             <th scope="col">Action</th>
                                         </tr>
                                     </thead>
@@ -55,32 +57,42 @@
                                             <td>{{i.date}}</td>
                                             <td>{{i.fixed_salary}}</td>
                                             <td>{{i.total_overtime}}</td>
+                                            <td>{{ i.advance_sum|default:0 }}</td>
+
+                                            <td>
+                                                <form method="post" action="/toggle_salary_status/{{ i.id }}/">
+                                                    {% csrf_token %}
+
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input"
+                                                               type="checkbox"
+                                                               onchange="this.form.submit()"
+                                                               {% if i.status == "paid" %}checked{% endif %}>
+                                                    </div>
+
+                                                    <small>
+                                                        {% if i.status == "paid" %}
+                                                            Paid
+                                                        {% else %}
+                                                            Pending
+                                                        {% endif %}
+                                                    </small>
+
+                                                </form>
+
+                                            </td>
+                                            <td>{{ i.pending_sum|default:0 }}</td>
+
                                             <td>{{i.total_salary}}</td>
-                                            <td>
-                                            <form method="post" action="/toggle_salary_status/{{ i.id }}/">
-                                                {% csrf_token %}
-
-                                                <div class="form-check form-switch">
-                                                    <input class="form-check-input"
-                                                           type="checkbox"
-                                                           onchange="this.form.submit()"
-                                                           {% if i.status == "paid" %}checked{% endif %}>
-                                                </div>
-
-                                                <small>
-                                                    {% if i.status == "paid" %}
-                                                        Paid
-                                                    {% else %}
-                                                        Pending
-                                                    {% endif %}
-                                                </small>
-
-                                            </form>
-                                        </td>
 
 
                                             <td>
-                                                <a href="/add_overtime/{{i.id}}" >Add Overtime</a>
+                                                <a href="/add_overtime/{{i.id}}" >Add Overtime</a><br>
+                                                <a href="/add_advance/{{i.id}}" >Add Advance</a><br>
+                                                {% if i.status != "paid" %}
+                                                    <a href="/add_pending/{{i.id}}">Add Pending</a>
+                                                {% endif %}
+
 
                                                 <br><br>
 
@@ -95,10 +107,11 @@
                                                    data-overtime="{{ i.total_overtime }}">
                                                    Over time details
                                                 </a>
-                                                <br><br>
+                                                <br>
                                                 <a href="/delete_overtime/{{i.id}}">Delete Overtime</a>
-
+                                                <br>
                                                 {% endif %}
+
                                             </td>
 
 
@@ -110,6 +123,57 @@
                         </div>
                 </div>
             </div>
+
+
+                                <nav>
+                                    <ul class="pagination pagination-sm justify-content-center mt-3">
+
+                                        {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                «
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">«</span>
+                                        </li>
+                                        {% endif %}
+
+                                        {% for num in page_obj.paginator.page_range %}
+                                            {% if page_obj.number == num %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ num }}</span>
+                                                </li>
+                                            {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+                                                <li class="page-item">
+                                                    <a class="page-link"
+                                                       href="?page={{ num }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                        {{ num }}
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}">
+                                                »
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">»</span>
+                                        </li>
+                                        {% endif %}
+
+                                    </ul>
+                                </nav>
+                                <p class="text-center text-muted small">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </p>
 
             <!-- table End -->
             <div class="modal fade" id="statusModal" tabindex="-1">

@@ -257,6 +257,34 @@
     <!-- Template Javascript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
     <script src="{% static 'js/main.js' %}"></script>
+    <script>
+    document.querySelectorAll("form").forEach(function(form) {
+
+        form.addEventListener("keydown", function(e) {
+
+            if (e.key === "Enter" && !e.ctrlKey && e.target.tagName === "INPUT") {
+                e.preventDefault();
+
+                let inputs = Array.from(
+                    form.querySelectorAll("input:not([type=hidden]):not([readonly])")
+                );
+
+                let index = inputs.indexOf(e.target);
+
+                if (inputs[index + 1]) {
+                    inputs[index + 1].focus();
+                    inputs[index + 1].select();   // ⭐️ auto select value while editing
+                }
+            }
+
+            if (e.key === "Enter" && e.ctrlKey) {
+                form.submit();
+            }
+
+        });
+
+    });
+    </script>
 </body>
 
 </html>

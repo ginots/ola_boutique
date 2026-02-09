@@ -45,6 +45,34 @@
                                       <textarea  name="address" class="form-control" id="address" style="width:50" readonly>{{data.address}}</textarea>
                                     </div>
                                 </div>
+                                <div class="mb-3">
+                                    <label class="col-sm-2 col-form-label">Cloth Details</label>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="radio"
+                                               name="cloth_from"
+                                               id="cloth_from_customer"
+                                               value="By Customer"
+                                               checked
+                                               required>
+                                        <label class="form-check-label" for="cloth_from_customer">
+                                            Brought by Customer
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="radio"
+                                               name="cloth_from"
+                                               id="cloth_from_shop"
+                                               value="From Shop">
+                                        <label class="form-check-label" for="cloth_from_shop">
+                                            From Shop
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div class="form-floating mb-3">
                                     <select class="form-select" id="floatingSelect"
                                         aria-label="cloth-type" name="cloth_type" required>

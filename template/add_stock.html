@@ -74,6 +74,37 @@
     <!-- Template Javascript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
     <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        document.querySelectorAll("form").forEach(function(form) {
+
+            form.addEventListener("keydown", function(e) {
+
+                if (e.key === "Enter" && !e.ctrlKey &&
+                    (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
+
+                    e.preventDefault();
+
+                    let fields = Array.from(
+                        form.querySelectorAll("input:not([type=hidden]):not([readonly]), textarea")
+                    );
+
+                    let index = fields.indexOf(e.target);
+
+                    if (fields[index + 1]) {
+                        fields[index + 1].focus();
+                        fields[index + 1].select?.();
+                    }
+                }
+
+                // CTRL + ENTER → Submit form
+                if (e.key === "Enter" && e.ctrlKey) {
+                    form.submit();
+                }
+
+            });
+
+        });
+    </script>
 </body>
 
 </html>

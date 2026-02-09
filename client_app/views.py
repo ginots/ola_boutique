@@ -1,12 +1,15 @@
 import csv
 from datetime import date, datetime
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.core.validators import validate_email
 from django.db.models import Q,Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.template.context_processors import request
 from django.contrib.auth.decorators import login_required
+import re
 
 
 from .models import *
@@ -68,17 +71,27 @@ def add_customer(request):
 def save_customer(request):
 
     if request.method == "POST":
+
         name = request.POST.get("name")
         phone = request.POST.get("phone")
-        email=request.POST.get("email")
-        address=request.POST.get("address")
+        email = request.POST.get("email")
+        address = request.POST.get("address")
 
-        tab_cust=TableCustomer()
-        tab_cust.name=name
-        tab_cust.phone=phone
-        tab_cust.email=email
-        tab_cust.address=address
-        tab_cust.save()
+        # Email validation
+        try:
+            if email:
+                validate_email(email)
+        except ValidationError:
+            messages.error(request, "Invalid email address")
+            return redirect("/add_customer/")
+
+        tab_cust = TableCustomer.objects.create(
+            name=name,
+            phone=phone,
+            email=email,
+            address=address
+        )
+
         return redirect("/customers/")
 
 @login_required(login_url='/')
@@ -87,19 +100,37 @@ def edit_customer(request,cust_id):
     return render(request,"edit_customer.html",{"data":data})
 
 @login_required(login_url='/')
-def update_customer(request,cust_id):
-    if request.method == "POST":
-        name=request.POST.get("name")
-        phone=request.POST.get("phone")
-        email=request.POST.get("email")
-        address=request.POST.get("address")
+def update_customer(request, cust_id):
 
-        tab_cust=TableCustomer.objects.get(id=cust_id)
-        tab_cust.name=name
-        tab_cust.phone=phone
-        tab_cust.email=email
-        tab_cust.address=address
+    if request.method == "POST":
+
+        name = request.POST.get("name")
+        phone = request.POST.get("phone")
+        email = request.POST.get("email")
+        address = request.POST.get("address")
+
+
+        try:
+            if email:
+                validate_email(email)
+        except ValidationError:
+            messages.error(request, "Invalid email address")
+            return redirect(f"/edit_customer/{cust_id}")
+
+
+        if phone and not phone.isdigit():
+            messages.error(request, "Phone must contain only numbers")
+            return redirect(f"/edit_customer/{cust_id}")
+
+        tab_cust = TableCustomer.objects.get(id=cust_id)
+        tab_cust.name = name
+        tab_cust.phone = phone
+        tab_cust.email = email
+        tab_cust.address = address
         tab_cust.save()
+
+        messages.success(request, "Customer updated successfully")
+
         return redirect("/customers/")
 
 @login_required(login_url='/')
@@ -468,16 +499,49 @@ def add_staff(request):
 
 @login_required(login_url='/')
 def save_staff(request):
-    if request.method=="POST":
-        tab_stf=TableStaffs()
-        tab_stf.name=request.POST.get("name")
-        tab_stf.phone=request.POST.get("phone")
-        tab_stf.role=request.POST.get("role")
-        tab_stf.email=request.POST.get("email")
-        tab_stf.address=request.POST.get("address")
-        tab_stf.monthly_salary=request.POST.get("salary")
-        tab_stf.status="active"
-        tab_stf.save()
+
+    if request.method == "POST":
+
+        name = request.POST.get("name")
+        phone = request.POST.get("phone")
+        role = request.POST.get("role")
+        email = request.POST.get("email")
+        address = request.POST.get("address")
+        salary = request.POST.get("salary")
+
+        if not re.match(r"^[A-Za-z .'-]+$", name):
+            messages.error(request, "Name can contain only letters")
+            return redirect("/add_staff/")
+
+        # -------- Phone Validation --------
+        if not phone.isdigit() or len(phone) != 10:
+            messages.error(request, "Phone must be 10 digits")
+            return redirect("/add_staff/")
+
+        # -------- Email Validation --------
+        try:
+            if email:
+                validate_email(email)
+        except ValidationError:
+            messages.error(request, "Invalid email")
+            return redirect("/add_staff/")
+
+        # -------- Duplicate Phone --------
+        if TableStaffs.objects.filter(phone=phone).exists():
+            messages.error(request, "Phone already exists")
+            return redirect("/add_staff/")
+
+        TableStaffs.objects.create(
+            name=name,
+            phone=phone,
+            role=role,
+            email=email,
+            address=address,
+            monthly_salary=salary,
+            status="active"
+        )
+
+        messages.success(request, "Staff added successfully")
         return redirect("/staff_details/")
 
 @login_required(login_url='/')
@@ -486,16 +550,50 @@ def edit_staff(request,stf_id):
     return render(request,"edit_staff.html",{"data":data})
 
 @login_required(login_url='/')
-def update_staff(request,stf_id):
+def update_staff(request, stf_id):
+
     if request.method == "POST":
+
         tab_stf = TableStaffs.objects.get(id=stf_id)
-        tab_stf.name = request.POST.get("name")
-        tab_stf.phone = request.POST.get("phone")
-        tab_stf.role = request.POST.get("role")
-        tab_stf.email = request.POST.get("email")
-        tab_stf.address = request.POST.get("address")
-        tab_stf.monthly_salary=request.POST.get("salary")
+
+        name = request.POST.get("name")
+        phone = request.POST.get("phone")
+        role = request.POST.get("role")
+        email = request.POST.get("email")
+        address = request.POST.get("address")
+        salary = request.POST.get("salary")
+
+        if not re.match(r"^[A-Za-z .'-]+$", name):
+            messages.error(request, "Name can contain only letters")
+            return redirect(f"/edit_staff/{stf_id}")
+
+        # -------- Phone Validation --------
+        if not phone.isdigit() or len(phone) != 10:
+            messages.error(request, "Phone must be 10 digits")
+            return redirect(f"/edit_staff/{stf_id}")
+
+        # -------- Email Validation --------
+        try:
+            if email:
+                validate_email(email)
+        except ValidationError:
+            messages.error(request, "Invalid email")
+            return redirect(f"/edit_staff/{stf_id}")
+
+        # -------- Duplicate Phone --------
+        if TableStaffs.objects.filter(phone=phone).exclude(id=stf_id).exists():
+            messages.error(request, "Phone already exists")
+            return redirect(f"/edit_staff/{stf_id}")
+
+        tab_stf.name = name
+        tab_stf.phone = phone
+        tab_stf.role = role
+        tab_stf.email = email
+        tab_stf.address = address
+        tab_stf.monthly_salary = salary
         tab_stf.save()
+
+        messages.success(request, "Staff updated successfully")
         return redirect("/staff_details/")
 
 @login_required(login_url='/')
@@ -552,45 +650,35 @@ def generate_salary(request):
 
         salary_date = request.POST.get("date")
 
+        # Validate date input
         if not salary_date:
             messages.warning(request, "Please select a date.")
             return redirect("/salary_status/")
-
-        from datetime import datetime
 
         salary_date = datetime.strptime(salary_date, "%Y-%m-%d")
 
         month = salary_date.month
         year = salary_date.year
-        day= salary_date.day
 
-        if not month or not year:
-            messages.warning(request, "Please select month and year.")
-            return redirect("/salary_status/")
-
-        month = int(month)
-        year = int(year)
-        day=int(day)
-
-
-
+        # ✅ Prevent duplicate salary generation for same month
         already_exists = TableSalary.objects.filter(
             date__month=month,
-            date__year=year,
-            date__day=day
+            date__year=year
         ).exists()
 
         if already_exists:
             messages.warning(request, "Salary already generated for this month.")
             return redirect("/salary_status/")
 
+        # ✅ Get all active staffs
         staffs = TableStaffs.objects.filter(status__iexact="active")
 
+        # ✅ Generate salary for each staff
         for staff in staffs:
 
             TableSalary.objects.create(
                 staff=staff,
-                date=date(year, month, day),
+                date=date(year, month, salary_date.day),   # keeps selected date
                 fixed_salary=staff.monthly_salary,
                 total_overtime=0,
                 total_salary=staff.monthly_salary,
@@ -630,7 +718,7 @@ def delete_salary(request):
         messages.success(request, "Salary deleted successfully.")
         return redirect("/salary_status/")
 
-@login_required(login_url='/')
+
 def calculate_total_salary(salary_obj):
 
     overtime_total = TableOvertime.objects.filter(

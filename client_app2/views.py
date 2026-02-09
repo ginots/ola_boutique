@@ -99,6 +99,7 @@ def save_order(request):
         phone = request.POST.get("phone")
         email = request.POST.get("email")
         address = request.POST.get("address")
+        cloth_details = request.POST.get("cloth_from")
         cloth_type = request.POST.get("cloth_type")
         if cloth_type == "1":
             item = ", ".join(request.POST.getlist("item"))
@@ -125,7 +126,7 @@ def save_order(request):
         status = "Ordered"
 
         TableOrders.objects.create( customer_id=customer_id, order_id=order_id, name=name,phone=phone,
-                                    email=email, address=address,cloth_type=cloth_type,
+                                    email=email, address=address,cloth_type=cloth_type, cloth_details=cloth_details,
                                    item=item, lining=lining, bottom=bottom,
                                    locking=locking, pattern=pattern, sareefall_type=sareefall_type,
                                    image=image, due_date=due_date, notes=notes,

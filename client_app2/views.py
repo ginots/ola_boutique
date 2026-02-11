@@ -467,8 +467,15 @@ from django.conf import settings
 import os
 # from .models import TableOrders, TableCustomer, TableChuridar, TableSaree
 
-WKHTMLTOPDF_PATH = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
-pdf_config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
+# WKHTMLTOPDF_PATH = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
+# pdf_config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
+
+from django.conf import settings
+import pdfkit
+
+pdf_config = pdfkit.configuration(
+    wkhtmltopdf=settings.WKHTMLTOPDF_PATH
+)
 
 def invoice_pdf(request, pk):
     order = get_object_or_404(TableOrders, pk=pk)

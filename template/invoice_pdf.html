@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<style>
+@page {
+    size: A4;
+    margin: 10mm;
+}
+
+body {
+    font-family: "Times New Roman", serif;
+    font-size: 13px;
+    color: #000;
+}
+
+.header {
+    background: #111;
+    color: white;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.header img {
+    height: 50px;
+}
+
+.header .info {
+    margin-left: 15px;
+    font-size: 13px;
+}
+
+.line {
+    border-bottom: 1px solid #000;
+    margin: 8px 0;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.section {
+    margin-top: 10px;
+}
+
+.box {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 1px solid #000;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.checked::after {
+    content: "✔";
+    font-size: 12px;
+    position: relative;
+    top: -2px;
+    left: 1px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table td {
+    padding: 4px;
+}
+
+.measure-title {
+    font-weight: bold;
+    margin-top: 10px;
+    text-decoration: underline;
+}
+.page-break {
+    page-break-before: always;
+}
+
+.avoid-break {
+    page-break-inside: avoid;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <img src="file:///{{ logo_path }}">
+    <div class="info">
+        Civil Station (South Gate), Near St. Francis Assisi Church<br>
+        Infopark Road, Kakkanad P.O, Ernakulam – 682030<br>
+        Mob: +91 75618 88858 | olaboutique@gmail.com
+    </div>
+</div>
+
+<div class="line"></div>
+
+<div class="row">
+    <div>Name: {{ customer.name }}</div>
+    <div>Date: {{ order.date }}</div>
+    <div>No: {{ order.order_id }}</div>
+</div>
+
+<div class="row">
+    <div>Mail ID: {{ customer.email }}</div>
+    <div>Ph: {{ customer.phone }}</div>
+    <div>Due Date: {{ order.due_date }}</div>
+</div>
+
+<div class="line"></div>
+
+{% if order.cloth_type == "1" %}
+
+<div class="avoid-break">
+<div class="section"><b>Item</b><br><br>
+<span class="box {% if 'Top' in items %}checked{% endif %}"></span> Top
+<span class="box {% if 'Bottom' in items %}checked{% endif %}"></span> Bottom
+<span class="box {% if 'Lining' in items %}checked{% endif %}"></span> Lining
+<span class="box {% if 'Skirt' in items %}checked{% endif %}"></span> Skirt
+<span class="box {% if 'Kafthan' in items %}checked{% endif %}"></span> Kafthan
+<span class="box {% if 'Frock' in items %}checked{% endif %}"></span> Frock
+<span class="box {% if 'Gown' in items %}checked{% endif %}"></span> Gown
+<span class="box {% if 'Shawl' in items %}checked{% endif %}"></span> Shawl
+</div>
+
+<div class="section"><b>Lining</b><br><br>
+<span class="box {% if 'Top' in linings %}checked{% endif %}"></span> Top
+<span class="box {% if 'Bottom' in linings %}checked{% endif %}"></span> Bottom
+<span class="box {% if 'Frock' in linings %}checked{% endif %}"></span> Frock
+<span class="box {% if 'Gown' in linings %}checked{% endif %}"></span> Gown
+<span class="box {% if 'Kafthan' in linings %}checked{% endif %}"></span> Kafthan
+</div>
+
+<div class="section"><b>Bottom</b><br><br>
+<span class="box {% if 'Chudi' in bottoms %}checked{% endif %}"></span> Chudi
+<span class="box {% if 'Salwar' in bottoms %}checked{% endif %}"></span> Salwar
+<span class="box {% if 'Palazzo' in bottoms %}checked{% endif %}"></span> Palazzo
+<span class="box {% if 'Pencil Pant' in bottoms %}checked{% endif %}"></span> Pencil Pant
+<span class="box {% if 'Afghan Pant' in bottoms %}checked{% endif %}"></span> Afghan Pant
+</div>
+
+<div class="section"><b>Locking</b><br><br>
+<span class="box {% if 'Shawl' in lockings %}checked{% endif %}"></span> Shawl
+<span class="box {% if 'Other' in lockings %}checked{% endif %}"></span> Other
+</div>
+
+<div class="section"><b>Pattern</b><br><br>
+<span class="box {% if 'Zip' in patterns %}checked{% endif %}"></span> Zip
+<span class="box {% if 'Piping' in patterns %}checked{% endif %}"></span> Piping
+<span class="box {% if 'Lace' in patterns %}checked{% endif %}"></span> Lace
+<span class="box {% if 'Embroidery' in patterns %}checked{% endif %}"></span> Embroidery
+<span class="box {% if 'Dori' in patterns %}checked{% endif %}"></span> Dori
+</div>
+
+<table style="width:100%; margin-top:10px;">
+<tr>
+
+<td style="width:72%; vertical-align:top;">
+
+<div class="measure-title">Body Measurements</div>
+<table class="table">
+<tr><td>Full Length</td><td>{{ measurement.flength }}</td><td>Muscle</td><td>{{ measurement.muscle }}</td><td>Neck F</td><td>{{ measurement.neckf }}</td></tr>
+<tr><td>Point</td><td>{{ measurement.point }}</td><td>Arm Hole</td><td>{{ measurement.ah }}</td><td>Neck B</td><td>{{ measurement.neckb }}</td></tr>
+<tr><td>Tuck</td><td>{{ measurement.tuck }}</td><td>Armpit F</td><td>{{ measurement.apf }}</td><td>Neck W</td><td>{{ measurement.neckw }}</td></tr>
+<tr><td>Yoke</td><td>{{ measurement.yoke }}</td><td>Armpit B</td><td>{{ measurement.apb }}</td></tr>
+<tr><td>P.W</td><td>{{ measurement.pw }}</td><td>Chest</td><td>{{ measurement.chest }}</td></tr>
+<tr><td>Slit</td><td>{{ measurement.slit }}</td><td>Bust</td><td>{{ measurement.bust }}</td></tr>
+<tr><td>Shoulder</td><td>{{ measurement.shoulder }}</td><td>Waist</td><td>{{ measurement.waist1 }}</td></tr>
+<tr><td>Sleeve Length</td><td>{{ measurement.sl }}</td><td>Hip</td><td>{{ measurement.hip }}</td></tr>
+<tr><td>Sleeve Round</td><td>{{ measurement.sr }}</td><td>Seat</td><td>{{ measurement.seat }}</td></tr>
+</table>
+
+<div class="measure-title">Bottom</div>
+<table class="table">
+<tr><td>Waist</td><td>{{ measurement.waist2 }}</td><td>Width</td><td>{{ measurement.width }}</td><td>Knee R</td><td>{{ measurement.kneer }}</td></tr>
+<tr><td>Length</td><td>{{ measurement.length }}</td><td>Knee L</td><td>{{ measurement.kneel }}</td><td>Thigh</td><td>{{ measurement.thighl }}</td></tr>
+</table>
+
+</td>
+
+<td style="width:28%; text-align:center; vertical-align:top;">
+    <img src="file:///{{ lady_path }}" style="height:520px; max-width:100%; object-fit:contain;">
+</td>
+
+</tr>
+</table>
+</div>
+{% endif %}
+
+
+{% if order.cloth_type == "2" %}
+
+<div class="avoid-break">
+<div class="section"><b>Item</b><br><br>
+<span class="box {% if 'Blouse' in items %}checked{% endif %}"></span> Blouse
+<span class="box {% if 'Saree' in items %}checked{% endif %}"></span> Saree
+<span class="box {% if 'Underskirt' in items %}checked{% endif %}"></span> Underskirt
+</div>
+
+<div class="section"><b>Lining</b><br><br>
+<span class="box {% if 'Blouse' in linings %}checked{% endif %}"></span> Blouse
+<span class="box {% if 'Underskirt' in linings %}checked{% endif %}"></span> Underskirt
+</div>
+
+<div class="section"><b>Locking</b><br><br>
+<span class="box {% if 'Saree' in lockings %}checked{% endif %}"></span> Saree
+<span class="box {% if 'Ready to Wear' in lockings %}checked{% endif %}"></span> Ready to Wear
+<span class="box {% if 'Extension' in lockings %}checked{% endif %}"></span> Extension
+<span class="box {% if 'Sareefall' in lockings %}checked{% endif %}"></span> Sareefall
+</div>
+
+{% if 'Sareefall' in lockings %}
+<div class="section"><b>Sareefall Type</b><br><br>
+<span class="box {% if order.sareefall_type == 'stitching' %}checked{% endif %}"></span> Stitching
+<span class="box {% if order.sareefall_type == 'hemming' %}checked{% endif %}"></span> Hemming
+</div>
+{% endif %}
+
+<div class="section"><b>Pattern</b><br><br>
+<span class="box {% if 'HandWork' in patterns %}checked{% endif %}"></span> Hand Work
+<span class="box {% if 'Dori' in patterns %}checked{% endif %}"></span> Dori
+<span class="box {% if 'Puff' in patterns %}checked{% endif %}"></span> Puff
+<span class="box {% if 'Others' in patterns %}checked{% endif %}"></span> Others
+</div>
+
+<table style="width:100%; margin-top:10px;">
+<tr>
+
+<td style="width:70%; vertical-align:top;">
+
+<div class="measure-title">Blouse Measurements</div>
+<table class="table">
+<tr><td>Full Length</td><td>{{ measurement.flength }}</td><td>Point</td><td>{{ measurement.point }}</td><td>Tuck</td><td>{{ measurement.tuck }}</td></tr>
+<tr><td>P.W</td><td>{{ measurement.pw }}</td><td>Shoulder</td><td>{{ measurement.shoulder }}</td><td>Sleeve Length</td><td>{{ measurement.sl }}</td></tr>
+<tr><td>Sleeve Round</td><td>{{ measurement.sr }}</td><td>Muscle</td><td>{{ measurement.muscle }}</td><td>Arm Hole</td><td>{{ measurement.ah }}</td></tr>
+<tr><td>Armpit F</td><td>{{ measurement.apf }}</td><td>Armpit B</td><td>{{ measurement.apb }}</td><td>Chest</td><td>{{ measurement.chest }}</td></tr>
+<tr><td>Bust</td><td>{{ measurement.bust }}</td><td>Waist</td><td>{{ measurement.waist1 }}</td><td>Neck F</td><td>{{ measurement.neckf }}</td></tr>
+<tr><td>Neck B</td><td>{{ measurement.neckb }}</td><td>Neck W</td><td>{{ measurement.neckw }}</td><td></td><td></td></tr>
+</table>
+
+<div class="measure-title">Underskirt Measurements</div>
+<table class="table">
+<tr><td>Waist</td><td>{{ measurement.waist2 }}</td><td>Length</td><td>{{ measurement.length1 }}</td><td>Down Width</td><td>{{ measurement.dwidth }}</td></tr>
+<tr><td>Knee L</td><td>{{ measurement.kneel }}</td><td>Knee R</td><td>{{ measurement.kneer }}</td><td>Seat</td><td>{{ measurement.seat }}</td></tr>
+</table>
+
+<div class="measure-title">Ready to Wear Saree</div>
+<table class="table">
+<tr><td>Waist</td><td>{{ measurement.waist3 }}</td><td>Length</td><td>{{ measurement.length2 }}</td><td>Pallu</td><td>{{ measurement.pallu }}</td></tr>
+</table>
+
+</td>
+
+<td style="width:30%; text-align:center; vertical-align:top;">
+<img src="file:///{{ lady_path }}" style="height:520px; max-width:100%; object-fit:contain;">
+</td>
+
+</tr>
+</table>
+</div>
+
+{% endif %}
+
+<div class="line"></div>
+<div><b>Amount:</b> {{ order.total }}</div>
+
+{% if order_images %}
+<div class="page-break"></div>
+
+<div class="measure-title">Sample / Reference Images</div>
+
+<table style="width:100%; margin-top:10px;">
+    <tr>
+        {% for img in order_images %}
+            <td style="padding:6px; text-align:center;">
+                <img src="file:///{{ img }}"
+                     style="width:200px; height:auto; border:1px solid #000;">
+            </td>
+
+            {% if forloop.counter|divisibleby:3 %}
+                </tr><tr>
+            {% endif %}
+        {% endfor %}
+    </tr>
+</table>
+{% endif %}
+
+
+
+</body>
+</html>

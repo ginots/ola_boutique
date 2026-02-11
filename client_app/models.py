@@ -89,7 +89,7 @@ class TableOrders(models.Model):
     phone = models.CharField(null=True, max_length=15)
     email = models.EmailField(max_length=50,null=True)
     address = models.TextField(null=True)
-    date = models.DateField(null=True, auto_now_add=True)
+    date = models.DateField(null=True)
     due_date = models.DateField(null=True)
     cloth_details = models.CharField(null=True, max_length=100)
     cloth_type = models.CharField(max_length=100, null=True)
@@ -99,7 +99,7 @@ class TableOrders(models.Model):
     locking = models.CharField(max_length=100, null=True)
     pattern = models.CharField(max_length=100, null=True)
     sareefall_type = models.CharField(max_length=100, null=True)
-    image = models.ImageField(null=True, upload_to="media/")
+
     stitching_charges = models.IntegerField(null=True)
     additional_charges = models.IntegerField(null=True)
     total = models.IntegerField(null=True)
@@ -107,6 +107,10 @@ class TableOrders(models.Model):
     balance = models.IntegerField(null=True)
     notes = models.TextField(null=True)
     status = models.CharField(max_length=100, null=True)
+
+class TableOrderImage(models.Model):
+    order = models.ForeignKey(TableOrders,related_name='images',on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='orders/')
 
 class TableStaffs(models.Model):
     staffid=models.CharField(max_length=20, unique=True, blank=True)

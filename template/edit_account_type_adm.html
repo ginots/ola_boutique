@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+
+{% include "navbar.html" %}
+
+<div class="container mt-5">
+  <h3 class="fw-bold text-primary mb-3">Edit Account Type</h3>
+
+  <form method="POST" action="{% url 'edit_account_type_adm' account_type.id %}">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="accountType" class="form-label">Account Type</label>
+      <input type="text" id="accountType" name="account_type" value="{{ account_type.account_type }}"
+             class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a href="{% url 'account_type_adm' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+
+
+
+</div>
+        <!-- Content End -->
+
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'lib/chart/chart.min.js' %}"></script>
+    <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+    <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+
+    <!-- Template Javascript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        document.querySelectorAll("form").forEach(function(form) {
+
+            form.addEventListener("keydown", function(e) {
+
+                if (e.key === "Enter" && !e.ctrlKey &&
+                    (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
+
+                    e.preventDefault();
+
+                    let fields = Array.from(
+                        form.querySelectorAll("input:not([type=hidden]):not([readonly]), textarea")
+                    );
+
+                    let index = fields.indexOf(e.target);
+
+                    if (fields[index + 1]) {
+                        fields[index + 1].focus();
+                        fields[index + 1].select?.();
+                    }
+                }
+
+                // CTRL + ENTER → Submit form
+                if (e.key === "Enter" && e.ctrlKey) {
+                    form.submit();
+                }
+
+            });
+
+        });
+    </script>
+</body>
+</html>

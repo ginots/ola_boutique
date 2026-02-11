@@ -420,7 +420,13 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="formFile" class="form-label">Sample Image (Optional)</label>
-                                    <input class="form-control bg-dark" type="file" id="formFile" name="image">
+                                    <input class="form-control bg-dark" type="file" id="formFile" name="images" multiple>
+                                </div>
+                                <div class="row mb-3">
+                                    <label  class="col-sm-2 col-form-label">Order Date</label>
+                                    <div class="col-sm-2">
+                                        <input type="date" name="date" class="form-control bg-light text-dark" required>
+                                    </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label  class="col-sm-2 col-form-label">Due Date</label>
@@ -515,6 +521,58 @@ document.getElementById("locking_4").addEventListener("change", function () {
         // uncheck radios when hiding
         document.querySelectorAll('input[name="sareefall_type"]').forEach(r => r.checked = false);
     }
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const select = document.getElementById("floatingSelect");
+    const type1 = document.getElementById("type1Fields");
+    const type2 = document.getElementById("type2Fields");
+
+    function toggleFields() {
+        if (select.value === "1") {
+            type1.style.display = "block";
+            type2.style.display = "none";
+
+            // enable type1 inputs
+            type1.querySelectorAll("input, select, textarea").forEach(el => {
+                el.disabled = false;
+            });
+
+            // disable type2 inputs
+            type2.querySelectorAll("input, select, textarea").forEach(el => {
+                el.disabled = true;
+                if (el.type === "checkbox" || el.type === "radio") {
+                    el.checked = false;
+                }
+            });
+
+        } else if (select.value === "2") {
+            type1.style.display = "none";
+            type2.style.display = "block";
+
+            // disable type1 inputs
+            type1.querySelectorAll("input, select, textarea").forEach(el => {
+                el.disabled = true;
+                if (el.type === "checkbox" || el.type === "radio") {
+                    el.checked = false;
+                }
+            });
+
+            // enable type2 inputs
+            type2.querySelectorAll("input, select, textarea").forEach(el => {
+                el.disabled = false;
+            });
+
+        } else {
+            type1.style.display = "none";
+            type2.style.display = "none";
+        }
+    }
+
+    toggleFields(); // on page load
+    select.addEventListener("change", toggleFields);
 });
 </script>
 

@@ -81,6 +81,7 @@
                                             <th scope="col">Balance to Pay</th>
                                             <th scope="col">Notes</th>
                                             <th scope="col">Status</th>
+                                            <th scope="col">Documents</th>
                                         </tr>
                                     </thead>
                                     {% for i in orders %}
@@ -104,15 +105,24 @@
                                             <td>{{i.pattern}}</td>
                                             <td>{{i.sareefall_type}}</td>
                                             <td>
-                                                  {% if i.image %}
-                                                  <img src="{{ i.image.url}}" width="50" height="50" >
-                                                    <a href="{{ i.image.url }}" download class="btn btn-sm btn-outline-success py-0 px-1">
-                                                        ⬇
-                                                    </a>
-                                                  {% else %}
-                                                <span>No Image</span>
-                                                  {% endif %}
+                                                {% if i.images.all %}
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        {% for img in i.images.all %}
+                                                            <div class="text-center">
+                                                                <img src="{{ img.image.url }}" width="50" height="50" class="rounded">
+                                                                <br>
+                                                                <a href="{{ img.image.url }}" download
+                                                                   class="btn btn-sm btn-outline-success py-0 px-1">
+                                                                    ⬇
+                                                                </a>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% else %}
+                                                    <span>No Image</span>
+                                                {% endif %}
                                             </td>
+
                                             <td>{{i.stitching_charges}}</td>
                                             <td>{{i.additional_charges}}</td>
                                             <td>{{i.total}}</td>
@@ -128,7 +138,10 @@
                                                 ✏️
                                               </button>
                                             </td>
-                                            <td><a class="btn btn-sm btn-outline-danger" href="{% url 'invoice' i.id %}">Invoice</a></td>
+                                            <td>
+                                                <a class="btn btn-sm btn-outline-danger" href="{% url 'invoice' i.id %}">Invoice</a><br><br>
+                                                <a class="btn btn-sm btn-outline-success" href="{% url 'invoice_pdf' i.id %}">PDF</a>
+                                            </td>
 
 
                                         </tr>
@@ -136,7 +149,7 @@
                                     <div class="modal fade" id="statusModal{{ i.id }}" tabindex="-1">
                                       <div class="modal-dialog modal-sm modal-dialog-centered">
                                         <div class="modal-content">
-                                          <form method="post" action="{% url 'update_order_status' i.id %}">
+                                          <form method="post" action="{% url 'update_ongoing_status' i.id %}">
                                             {% csrf_token %}
                                             <div class="modal-header py-2">
                                               <h6 class="modal-title">Update Status</h6>
@@ -147,6 +160,8 @@
                                               <select name="status" class="form-select form-select-sm" required>
                                                 <option value="Ordered" {% if i.status == "Ordered" %}selected{% endif %}>Ordered</option>
                                                 <option value="Completed" {% if i.status == "Completed" %}selected{% endif %}>Completed</option>
+                                                <option value="Delivered" {% if i.status == "Delivered" %}selected{% endif %}>Delivered</option>
+                                                <option value="On Hold" {% if i.status == "On Hold" %}selected{% endif %}>On Hold</option>
                                                 <option value="Cancelled" {% if i.status == "Cancelled" %}selected{% endif %}>Cancelled</option>
                                               </select>
                                             </div>

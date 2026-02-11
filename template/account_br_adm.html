@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+
+{% include "navbar.html" %}
+
+<style>
+  main {
+    margin-left: 0 !important;
+  }
+  .table-responsive {
+    max-height: 70vh;
+  }
+  .search-box {
+    max-width: 300px;
+  }
+
+</style>
+
+
+<div class="container-fluid">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+<!--    <h3 class="fw-bold text-primary mb-2">{{ gtg.branch_name }}</h3>-->
+    <div class="d-flex flex-wrap gap-2">
+
+     <form id="form1" method="get" action="{% url 'account_br_adm' %}" class="d-flex align-items-center me-2">
+      <label class="me-2 small text-muted">Show</label>
+      <select name="per_page" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+        <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+      </select>
+      <span class="ms-2 small text-muted">entries</span>
+    </form>
+
+      <form method="get" id="form2" action="{% url 'account_br_adm' %}" class="d-flex search-box">
+        <input type="text" name="q" value="{{ query }}" class="form-control form-control-sm"
+               placeholder="Search account..." />
+        <button form="form2" type="submit" class="btn btn-sm btn-outline-primary ms-2">Search</button>
+      </form>
+
+      <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addAccountModal">+ Add</button>
+      <!--
+      {% comment %}
+      <button class="btn btn-sm btn-secondary" onclick="window.print()">🖨 Print</button>
+      {% endcomment %}
+      -->
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle table-hover">
+      <thead class="table-dark text-dark">
+        <tr>
+          <th>#</th>
+          <th>Account Name</th>
+          <th>Type</th>
+          <th>Opening Balance</th>
+          <th>Updated Balance</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for acc in page_obj %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ acc.name }}</td>
+          <td>{{ acc.acount_type.account_type }}</td>
+          <td>{{ acc.balance }}</td>
+          <td>{{ acc.updated_balance }}</td>
+          <td>
+            <button class="btn btn-sm btn-warning me-1 edit-btn"
+                    data-id="{{ acc.id }}"
+                    data-name="{{ acc.name }}"
+                    data-balance="{{ acc.balance }}"
+                    data-type="{{ acc.acount_type.id }}">
+              Edit
+            </button>
+
+            <a href="{% url 'delete_account_adm' acc.id %}" class="btn btn-sm btn-danger"
+               onclick="return confirm('Are you sure you want to delete this account?');">
+               Delete
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted">No accounts found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <nav>
+    <ul class="pagination justify-content-center mt-3">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}">«></a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">«</span></li>
+      {% endif %}
+
+      <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}">»</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">»</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+
+<!-- Modal: Add Account -->
+<div class="modal fade" id="addAccountModal" tabindex="-1" aria-labelledby="addAccountModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <form id="form3" method="POST" action="{% url 'account_br_adm' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Add New Account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Account Name</label>
+            <input type="text" name="name" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Balance</label>
+            <input type="number" step="0.01" name="balance" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Account Type</label>
+            <select name="acount_type" class="form-select" required>
+              <option value="">Select type</option>
+              {% for type in account_types %}
+              <option value="{{ type.id }}">{{ type.account_type }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button form="form3" type="submit" class="btn btn-success">Save</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Edit Account -->
+<div class="modal fade" id="editAccountModal" tabindex="-1" aria-labelledby="editAccountModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <form method="POST" id="editAccountForm">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Edit Account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="account_id" id="editAccountId" />
+          <div class="mb-3">
+            <label class="form-label">Account Name</label>
+            <input type="text" name="name" id="editAccountName" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Balance(Readonly)</label>
+            <input type="number" step="0.01" name="balance" id="editAccountBalance" class="form-control" readonly />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Account Type</label>
+            <select name="acount_type" id="editAccountType" class="form-select" required>
+              <option value="">Select type</option>
+              {% for type in account_types %}
+              <option value="{{ type.id }}">{{ type.account_type }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Update</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+</div>
+        <!-- Content End -->
+
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'lib/chart/chart.min.js' %}"></script>
+    <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+    <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+
+    <!-- Template Javascript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        document.querySelectorAll("form").forEach(function(form) {
+
+            form.addEventListener("keydown", function(e) {
+
+                if (e.key === "Enter" && !e.ctrlKey &&
+                    (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
+
+                    e.preventDefault();
+
+                    let fields = Array.from(
+                        form.querySelectorAll("input:not([type=hidden]):not([readonly]), textarea")
+                    );
+
+                    let index = fields.indexOf(e.target);
+
+                    if (fields[index + 1]) {
+                        fields[index + 1].focus();
+                        fields[index + 1].select?.();
+                    }
+                }
+
+                // CTRL + ENTER → Submit form
+                if (e.key === "Enter" && e.ctrlKey) {
+                    form.submit();
+                }
+
+            });
+
+        });
+    </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const editButtons = document.querySelectorAll(".edit-btn");
+  const editForm = document.getElementById("editAccountForm");
+  const editModal = new bootstrap.Modal(document.getElementById("editAccountModal"));
+
+  editButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      const name = btn.getAttribute("data-name");
+      const balance = btn.getAttribute("data-balance");
+      const type = btn.getAttribute("data-type");
+
+      document.getElementById("editAccountId").value = id;
+      document.getElementById("editAccountName").value = name;
+      document.getElementById("editAccountBalance").value = balance;
+      document.getElementById("editAccountType").value = type;
+
+      // dynamically set form action
+      editForm.action = `/edit_account_adm/${id}/`;
+
+      editModal.show();
+    });
+  });
+});
+</script>
+
+</body>
+</html>

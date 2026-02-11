@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+
+{% include "navbar.html" %}
+
+<style>
+  main { margin-left: 0 !important; }
+  .table-responsive { max-height: 70vh; }
+  .search-box { min-width: 300px; }
+  .action-buttons { gap: 8px; }
+</style>
+
+<div class="container-fluid">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+<!--    <h3 class="fw-bold text-primary mb-2">{{ branch.branch_name }}</h3>-->
+
+    <div class="d-flex flex-wrap gap-2">
+
+      <form id="form1" method="get" class="d-flex flex-wrap align-items-center gap-2">
+        <input type="date" name="from_date" value="{{ request.GET.from_date }}" class="form-control form-control-sm" />
+        <input type="date" name="to_date" value="{{ request.GET.to_date }}" class="form-control form-control-sm" />
+        <select name="entries" class="form-select form-select-sm">
+          <option value="10" {% if request.GET.entries == "10" %}selected{% endif %}>10</option>
+          <option value="20" {% if request.GET.entries == "20" %}selected{% endif %}>20</option>
+          <option value="50" {% if request.GET.entries == "50" %}selected{% endif %}>50</option>
+          <option value="100" {% if request.GET.entries == "100" %}selected{% endif %}>100</option>
+        </select>
+        <input type="text" name="q" value="{{ query }}" placeholder="Search..." class="form-control form-control-sm" />
+        <button form="form1" type="submit" class="btn btn-sm btn-outline-primary">Search</button>
+      </form>
+
+
+      <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
+        + Add
+      </button>
+    </div>
+  </div>
+
+  <!-- CARD VIEW FOR TRANSACTIONS -->
+    <div class="row g-3">
+
+      {% for t in page_obj %}
+      <div class="col-md-6 col-lg-4">
+
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-start">
+              <h5 class="card-title text-primary mb-2">{{ t.description }}</h5>
+              {% if t.transaction_type == 'debit' %}
+                <span class="badge bg-success">Debit</span>
+              {% else %}
+                <span class="badge bg-danger">Credit</span>
+              {% endif %}
+            </div>
+
+            <p class="text-muted small mb-1">
+              <strong>Date:</strong> {{ t.date }}
+            </p>
+
+            <p class="mb-1">
+              <strong>Account:</strong><br>
+              {{ t.account.name }} ({{ t.account.acount_type.account_type }})
+            </p>
+
+            <p class="mb-1">
+              <strong>Account Balance:</strong> {{ t.account.updated_balance }}
+            </p>
+
+            <p class="mb-3">
+              <strong>Amount:</strong>
+              <span class="fw-bold">{{ t.amount }}</span>
+            </p>
+
+<!--            <a href=""-->
+<!--               class="btn btn-info btn-sm w-100 mb-2"-->
+<!--               target="_blank">-->
+<!--              Receipt-->
+<!--            </a>-->
+
+            <div class="d-flex justify-content-between">
+
+              <!-- EDIT BUTTON -->
+              <button class="btn btn-warning btn-sm edit-btn"
+                data-id="{{ t.id }}"
+                data-desc="{{ t.description }}"
+                data-amount="{{ t.amount }}"
+                data-type="{{ t.transaction_type }}"
+                data-accountname="{{ t.account.name }} - {{ t.account.acount_type.account_type }}"
+                data-accountid="{{ t.account.id }}">
+                Edit
+              </button>
+
+              <!-- DELETE FORM -->
+              <form method="POST"
+                    action="{% url 'transaction_br_adm' %}"
+                    class="ms-2">
+                {% csrf_token %}
+                <input type="hidden" name="delete_id" value="{{ t.id }}">
+
+                <select name="delete_mode" class="form-select form-select-sm mb-1" required>
+<!--                  <option value="no_effect">Delete Only</option>-->
+                    <option value="with_effect">Delete</option>
+
+                </select>
+
+                <button type="submit"
+                        onclick="return confirm('Are you sure you want to delete this transaction?');"
+                        class="btn btn-danger btn-sm w-100">
+                  Delete
+                </button>
+              </form>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+      {% empty %}
+        <div class="text-center text-muted py-5">
+          No transactions found.
+        </div>
+      {% endfor %}
+
+    </div>
+
+
+  <!-- Pagination -->
+  <nav>
+    <ul class="pagination justify-content-center mt-3">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}">«</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">«</span></li>
+      {% endif %}
+
+      <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}">»</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">»</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+
+
+<!-- ADD TRANSACTION MODAL -->
+<div class="modal fade" id="addTransactionModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <form id="addForm" method="POST" action="{% url 'transaction_br_adm' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Add Transaction</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <div class="mb-3">
+            <label>Description</label>
+            <input type="text" name="description" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label>Amount</label>
+            <input type="number" step="0.01" name="amount" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label>Account</label>
+            <select name="account" class="form-select" required>
+              <option value="">Select account</option>
+              {% for a in accounts %}
+              <option value="{{ a.id }}">{{ a.acount_type.account_type }} - {{ a.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label>Transaction Type</label>
+            <select name="transaction_type" class="form-select" required>
+              <option value="">Select type</option>
+              <option value="debit">Debit (Money In)</option>
+              <option value="credit">Credit (Money Out)</option>
+            </select>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button form="addForm" class="btn btn-success" type="submit">Add</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+
+<!-- EDIT TRANSACTION MODAL -->
+<div class="modal fade" id="editTransactionModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <form id="editFormm" method="POST" action="{% url 'transaction_br_adm' %}">
+        {% csrf_token %}
+        <input type="hidden" name="transaction_id" id="editId">
+
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Edit Transaction</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <div class="mb-3">
+            <label>Description</label>
+            <input type="text" name="description" id="editDesc" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label>Amount</label>
+            <input type="number" step="0.01" name="amount" id="editAmount" class="form-control" required>
+            <input type="hidden" id="editAccountText" name="account" class="form-control">
+          </div>
+
+          <div class="mb-3">
+            <label>Transaction Type</label>
+            <select name="transaction_type" id="editType" class="form-select" required>
+              <option value="debit">Debit (Money In)</option>
+              <option value="credit">Credit (Money Out)</option>
+            </select>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary" type="submit" form="editFormm">Update</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+</div>
+        <!-- Content End -->
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const editButtons = document.querySelectorAll(".edit-btn");
+  const editModal = new bootstrap.Modal(document.getElementById("editTransactionModal"));
+
+  editButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+
+      document.getElementById("editId").value = btn.dataset.id;
+      document.getElementById("editDesc").value = btn.dataset.desc;
+      document.getElementById("editAmount").value = btn.dataset.amount;
+
+      // Auto-select previous transaction type
+      document.getElementById("editType").value = btn.dataset.type.trim().toLowerCase();
+
+      // Read-only account label
+      document.getElementById("editAccountText").value = btn.dataset.accountid;
+
+      editModal.show();
+    });
+  });
+
+});
+
+</script>
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'lib/chart/chart.min.js' %}"></script>
+    <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+    <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+
+    <!-- Template Javascript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        document.querySelectorAll("form").forEach(function(form) {
+
+            form.addEventListener("keydown", function(e) {
+
+                if (e.key === "Enter" && !e.ctrlKey &&
+                    (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
+
+                    e.preventDefault();
+
+                    let fields = Array.from(
+                        form.querySelectorAll("input:not([type=hidden]):not([readonly]), textarea")
+                    );
+
+                    let index = fields.indexOf(e.target);
+
+                    if (fields[index + 1]) {
+                        fields[index + 1].focus();
+                        fields[index + 1].select?.();
+                    }
+                }
+
+                // CTRL + ENTER → Submit form
+                if (e.key === "Enter" && e.ctrlKey) {
+                    form.submit();
+                }
+
+            });
+
+        });
+    </script>
+</body>
+</html>

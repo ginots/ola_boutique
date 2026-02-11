@@ -4,7 +4,7 @@ from datetime import date
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
-
+from django.contrib.staticfiles import finders
 
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum, F
@@ -522,6 +522,9 @@ def invoice_pdf(request, pk):
             os.path.join(settings.MEDIA_ROOT, img.image.name)
         )
 
+    lady_path = finders.find("img/lady__outline.jpg")
+    logo_path = finders.find("img/logo.jpg")
+
     context = {
         "order": order,
         "customer": customer,
@@ -531,8 +534,10 @@ def invoice_pdf(request, pk):
         "bottoms": bottoms,
         "lockings": lockings,
         "patterns": patterns,
-        "logo_path": os.path.join(settings.STATIC_ROOT, "img/logo.jpg"),
-        "lady_path": os.path.join(settings.STATIC_ROOT, "img/lady__outline.jpg"),
+        # "logo_path": os.path.join(settings.STATIC_ROOT, "img/logo.jpg"),
+        # "lady_path": os.path.join(settings.STATIC_ROOT, "img/lady__outline.jpg"),
+        "logo_path": logo_path,
+        "lady_path": lady_path,
         "order_images": image_paths,
     }
 

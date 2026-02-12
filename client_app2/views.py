@@ -430,6 +430,7 @@ def profile_settings(request):
 
     return render(request, "profile.html", {"user": user})
 
+@login_required(login_url='/')
 def update_password(request):
     if request.method == "POST":
         user = request.user
@@ -476,7 +477,7 @@ import pdfkit
 pdf_config = pdfkit.configuration(
     wkhtmltopdf=settings.WKHTMLTOPDF_PATH
 )
-
+@login_required(login_url='/')
 def invoice_pdf(request, pk):
     order = get_object_or_404(TableOrders, pk=pk)
     customer = get_object_or_404(TableCustomer, custid=order.customer_id)
@@ -569,7 +570,7 @@ def invoice_pdf(request, pk):
 
     return response
 
-
+@login_required(login_url='/')
 def account_type_adm(request):
     """List all account types + create new"""
     account_types = Account_type.objects.all().order_by('id')
@@ -587,7 +588,7 @@ def account_type_adm(request):
         "account_types": account_types,
     })
 
-
+@login_required(login_url='/')
 def edit_account_type_adm(request, id):
     """Edit existing account type"""
     account_type = get_object_or_404(Account_type, id=id)
@@ -606,7 +607,7 @@ def edit_account_type_adm(request, id):
         "account_type": account_type,
     })
 
-
+@login_required(login_url='/')
 def delete_account_type_adm(request, id):
     """Delete account type"""
     account_type = get_object_or_404(Account_type, id=id)
@@ -614,6 +615,7 @@ def delete_account_type_adm(request, id):
     messages.success(request, "Account type deleted successfully!")
     return redirect('account_type_adm')
 
+@login_required(login_url='/')
 def account_br_adm(request):
     """List, search, paginate, and add new Accounts"""
     # gtg = Branches.objects.get(id = id)
@@ -672,7 +674,7 @@ def account_br_adm(request):
     }
     return render(request, "account_br_adm.html", context)
 
-
+@login_required(login_url='/')
 def edit_account_adm(request, id):
     acc = get_object_or_404(Account, id=id)
     # gbg = int(acc.id)
@@ -694,7 +696,7 @@ def edit_account_adm(request, id):
         return redirect('account_br_adm')
     return redirect('account_br_adm')
 
-
+@login_required(login_url='/')
 def delete_account_adm(request, id):
     account = get_object_or_404(Account, id=id)
     account.delete()
@@ -702,6 +704,7 @@ def delete_account_adm(request, id):
     return redirect('account_br_adm')
 
 from django.db import transaction as db_transaction
+@login_required(login_url='/')
 def transaction_br_adm(request):
     """List, search, paginate, add, edit, and delete Transactions"""
     # branch = get_object_or_404(Branches, id=id)
@@ -883,6 +886,7 @@ def transaction_br_adm(request):
     }
     return render(request, "transaction_br_adm.html", context)
 
+@login_required(login_url='/')
 def ledger_br_adm(request):
     # branch = get_object_or_404(Branches, id=branch_id)
 
@@ -958,6 +962,7 @@ def ledger_br_adm(request):
 
     return render(request, "ledger_br_adm.html", context)
 
+@login_required(login_url='/')
 def export_ledger_csv(request):
     account_id = request.GET.get("account")
     from_date = request.GET.get("from_date")
